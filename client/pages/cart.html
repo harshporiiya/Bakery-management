@@ -1,0 +1,260 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Shopping Cart & Checkout | Sweet Delight Bakery</title>
+  <link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+
+  <!-- Sticky Navbar -->
+  <nav class="navbar glass-panel">
+    <a href="/" class="nav-brand">🍰 Sweet <span>Delight</span></a>
+    <ul class="nav-links">
+      <li><a href="/">Home</a></li>
+      <li><a href="/#menu-section">Menu</a></li>
+      <li><a href="/pages/profile.html">My Orders</a></li>
+    </ul>
+    <div class="nav-actions">
+      <button onclick="toggleTheme()" class="theme-toggle-btn" id="theme-toggle-btn">🌙</button>
+      <div id="nav-user-actions"></div>
+    </div>
+  </nav>
+
+  <div class="cart-container">
+    <!-- Left Column: Items Table -->
+    <div class="glass-panel" style="padding: 28px;">
+      <h2 class="font-heading" style="margin-bottom: 20px;">Your Bakery Order Items</h2>
+      
+      <div id="cart-table-wrapper">
+        <table class="cart-table">
+          <thead>
+            <tr>
+              <th>Item</th>
+              <th>Price</th>
+              <th>Quantity</th>
+              <th>Subtotal</th>
+              <th>Action</th>
+            </tr>
+          </thead>
+          <tbody id="cart-items-body">
+            <!-- Dynamic Cart Rows -->
+          </tbody>
+        </table>
+      </div>
+
+      <!-- Shipping Address Form -->
+      <div style="margin-top: 30px; border-top: 1px solid var(--border-color); padding-top: 20px;">
+        <h3 class="font-heading" style="margin-bottom: 12px;">Delivery Address</h3>
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px;">
+          <input type="text" id="cust-name" class="form-control" placeholder="Full Name" required>
+          <input type="tel" id="cust-phone" class="form-control" placeholder="Phone Number" required>
+        </div>
+        <input type="text" id="street-address" class="form-control" placeholder="Street / House No. / Landmark" style="margin-top: 12px;" required>
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-top: 12px;">
+          <input type="text" id="city" class="form-control" placeholder="City" value="Ahmedabad">
+          <input type="text" id="zip" class="form-control" placeholder="Pincode" value="380001">
+        </div>
+      </div>
+    </div>
+
+    <!-- Right Column: Summary & Payment -->
+    <div class="order-summary-card glass-panel">
+      <h3 class="font-heading" style="margin-bottom: 18px;">Order Summary</h3>
+      
+      <div class="summary-row">
+        <span>Items Subtotal</span>
+        <span id="sum-subtotal">₹0</span>
+      </div>
+
+      <div class="summary-row">
+        <span>GST (5%)</span>
+        <span id="sum-gst">₹0</span>
+      </div>
+
+      <div class="summary-row">
+        <span>Delivery Fee</span>
+        <span id="sum-delivery">₹40</span>
+      </div>
+
+      <div class="summary-row" id="discount-row" style="color: var(--warm-accent); display: none;">
+        <span>Promo Discount</span>
+        <span id="sum-discount">-₹0</span>
+      </div>
+
+      <div class="summary-row grand-total">
+        <span>Grand Total</span>
+        <span id="sum-grandtotal">₹0</span>
+      </div>
+
+      <!-- Coupon Application -->
+      <div class="coupon-box">
+        <input type="text" id="coupon-code-input" placeholder="Promo code (e.g. WELCOME10)">
+        <button onclick="applyCouponHandler()" class="btn btn-outline btn-sm">Apply</button>
+      </div>
+
+      <!-- Payment Method Selector -->
+      <h4 style="font-size: 0.9rem; font-weight: 700; margin-top: 16px;">Select Payment Method</h4>
+      <div class="payment-methods-grid">
+        <div class="payment-method-card selected" onclick="selectPaymentMethod('Cash', this)">💵 Cash on Delivery</div>
+        <div class="payment-method-card" onclick="selectPaymentMethod('UPI', this)">📱 UPI / QR</div>
+        <div class="payment-method-card" onclick="selectPaymentMethod('Google Pay', this)">🔵 Google Pay</div>
+        <div class="payment-method-card" onclick="selectPaymentMethod('PhonePe', this)">🟣 PhonePe</div>
+        <div class="payment-method-card" onclick="selectPaymentMethod('Paytm', this)">💙 Paytm</div>
+        <div class="payment-method-card" onclick="selectPaymentMethod('Credit Card', this)">💳 Credit / Debit Card</div>
+        <div class="payment-method-card" onclick="selectPaymentMethod('Net Banking', this)">🏦 Net Banking</div>
+      </div>
+
+      <button onclick="processCheckout()" class="btn btn-gold" style="width: 100%; margin-top: 16px;">
+        Place Order & Track Live 🚀
+      </button>
+    </div>
+  </div>
+
+  <script src="/socket.io/socket.io.js"></script>
+  <script src="/js/auth.js"></script>
+  <script src="/js/cart.js"></script>
+  <script src="/js/socket-client.js"></script>
+  <script>
+    let selectedPayment = 'Cash';
+
+    function renderCartPage() {
+      const tbody = document.getElementById('cart-items-body');
+      const cart = getCart();
+
+      if (!tbody) return;
+
+      if (cart.length === 0) {
+        document.getElementById('cart-table-wrapper').innerHTML = `
+          <div style="text-align: center; padding: 40px;">
+            <h3>🛒 Your Cart is Empty</h3>
+            <p style="color: var(--text-light); margin-top: 8px;">Explore our cakes and pastries to add delicious items!</p>
+            <a href="/" class="btn btn-gold" style="margin-top: 16px;">Go to Bakery Menu</a>
+          </div>
+        `;
+        return;
+      }
+
+      tbody.innerHTML = cart.map(item => `
+        <tr>
+          <td>
+            <div class="cart-item-info">
+              <img src="${item.image}" alt="${item.name}">
+              <div>
+                <strong>${item.name}</strong>
+                <div style="font-size: 0.8rem; color: var(--text-light);">Weight: ${item.weight}</div>
+              </div>
+            </div>
+          </td>
+          <td>₹${item.price}</td>
+          <td>
+            <div class="qty-control">
+              <button class="qty-btn" onclick="updateCartQuantity('${item.productId}', ${item.quantity - 1})">-</button>
+              <span>${item.quantity}</span>
+              <button class="qty-btn" onclick="updateCartQuantity('${item.productId}', ${item.quantity + 1})">+</button>
+            </div>
+          </td>
+          <td><strong>₹${(item.price * item.quantity).toFixed(2)}</strong></td>
+          <td>
+            <button onclick="removeFromCart('${item.productId}')" style="background: none; border: none; color: #E74C3C; font-size: 1.2rem; cursor: pointer;">🗑️</button>
+          </td>
+        </tr>
+      `).join('');
+
+      const totals = calculateCartTotals();
+      document.getElementById('sum-subtotal').textContent = `₹${totals.subtotal.toFixed(2)}`;
+      document.getElementById('sum-gst').textContent = `₹${totals.gst.toFixed(2)}`;
+      document.getElementById('sum-delivery').textContent = `₹${totals.deliveryCharge.toFixed(2)}`;
+      document.getElementById('sum-grandtotal').textContent = `₹${totals.grandTotal.toFixed(2)}`;
+
+      if (totals.discount > 0) {
+        document.getElementById('discount-row').style.display = 'flex';
+        document.getElementById('sum-discount').textContent = `-₹${totals.discount.toFixed(2)}`;
+      }
+    }
+
+    function applyCouponHandler() {
+      const code = document.getElementById('coupon-code-input').value;
+      applyCouponCode(code);
+    }
+
+    function selectPaymentMethod(method, element) {
+      selectedPayment = method;
+      document.querySelectorAll('.payment-method-card').forEach(el => el.classList.remove('selected'));
+      element.classList.add('selected');
+    }
+
+    async function processCheckout() {
+      const cart = getCart();
+      if (cart.length === 0) {
+        alert('Cart is empty.');
+        return;
+      }
+
+      if (!isLoggedIn()) {
+        alert('Please login to place your order.');
+        window.location.href = '/pages/login.html';
+        return;
+      }
+
+      const name = document.getElementById('cust-name').value || getCurrentUser().name;
+      const phone = document.getElementById('cust-phone').value || '9876543210';
+      const street = document.getElementById('street-address').value || '12 Bakery Lane';
+      const city = document.getElementById('city').value || 'Ahmedabad';
+      const zip = document.getElementById('zip').value || '380001';
+
+      const totals = calculateCartTotals();
+
+      const orderPayload = {
+        customerName: name,
+        customerPhone: phone,
+        items: cart,
+        subtotal: totals.subtotal,
+        gst: totals.gst,
+        deliveryCharge: totals.deliveryCharge,
+        discount: totals.discount,
+        grandTotal: totals.grandTotal,
+        paymentMethod: selectedPayment,
+        shippingAddress: { street, city, zip }
+      };
+
+      try {
+        const token = getAuthToken();
+        const res = await fetch('/api/orders', {
+          method: 'POST',
+          headers: { 
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${token}`
+          },
+          body: JSON.stringify(orderPayload)
+        });
+        const data = await res.json();
+
+        if (data.success) {
+          clearCart();
+          showToast('🎉 Order placed successfully!');
+          setTimeout(() => {
+            window.location.href = '/pages/profile.html';
+          }, 1000);
+        } else {
+          alert('Checkout Error: ' + data.message);
+        }
+      } catch (err) {
+        alert('Error placing order.');
+      }
+    }
+
+    window.renderCartPage = renderCartPage;
+
+    document.addEventListener('DOMContentLoaded', () => {
+      const user = getCurrentUser();
+      if (user) {
+        document.getElementById('cust-name').value = user.name || '';
+        document.getElementById('cust-phone').value = user.phone || '';
+      }
+      renderCartPage();
+    });
+  </script>
+</body>
+</html>

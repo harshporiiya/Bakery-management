@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Sign Up | Sweet Delight Bakery</title>
+  <link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+
+  <!-- Sticky Navbar -->
+  <nav class="navbar glass-panel">
+    <a href="/" class="nav-brand">🍰 Sweet <span>Delight</span></a>
+    <div class="nav-actions">
+      <button onclick="toggleTheme()" class="theme-toggle-btn" id="theme-toggle-btn">🌙</button>
+      <a href="/" class="btn btn-outline btn-sm">Home</a>
+    </div>
+  </nav>
+
+  <div class="auth-container">
+    <div class="auth-card glass-panel" style="max-width: 520px;">
+      <div style="text-align: center; margin-bottom: 24px;">
+        <h2 class="font-heading" style="font-size: 2rem; color: var(--text-primary);">Create Customer Account</h2>
+        <p style="color: var(--text-secondary); font-size: 0.9rem;">Join Sweet Delight and get 50 instant reward points! 🎁</p>
+      </div>
+
+      <form id="signup-form">
+        <div class="form-group">
+          <label for="name">Full Name</label>
+          <input type="text" id="name" class="form-control" placeholder="John Doe" required autofocus>
+        </div>
+
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px;">
+          <div class="form-group">
+            <label for="email">Email Address</label>
+            <input type="email" id="email" class="form-control" placeholder="john@example.com" required>
+          </div>
+          <div class="form-group">
+            <label for="phone">Phone Number</label>
+            <input type="tel" id="phone" class="form-control" placeholder="+91 9876543210">
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label for="password">Create Password</label>
+          <input type="password" id="password" class="form-control" placeholder="••••••••" required>
+        </div>
+
+        <h4 style="font-size: 0.9rem; font-weight: 700; margin: 16px 0 10px 0; color: var(--gold-accent);">Delivery Address Details</h4>
+
+        <div class="form-group">
+          <label for="street">Street Address / House No.</label>
+          <input type="text" id="street" class="form-control" placeholder="12 Bakery Lane, Gourmet Square">
+        </div>
+
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px;">
+          <div class="form-group">
+            <label for="city">City</label>
+            <input type="text" id="city" class="form-control" placeholder="Ahmedabad" value="Ahmedabad">
+          </div>
+          <div class="form-group">
+            <label for="zip">Pincode</label>
+            <input type="text" id="zip" class="form-control" placeholder="380001" value="380001">
+          </div>
+        </div>
+
+        <button type="submit" class="btn btn-gold" style="width: 100%; margin-top: 14px;">Create Account</button>
+      </form>
+
+      <div style="margin-top: 20px; text-align: center; font-size: 0.85rem;">
+        <a href="/pages/login.html" style="color: var(--text-secondary);">Already have an account? <strong>Sign In</strong></a>
+      </div>
+    </div>
+  </div>
+
+  <script src="/js/auth.js"></script>
+  <script>
+    document.getElementById('signup-form').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const name = document.getElementById('name').value;
+      const email = document.getElementById('email').value;
+      const phone = document.getElementById('phone').value;
+      const password = document.getElementById('password').value;
+      const street = document.getElementById('street').value;
+      const city = document.getElementById('city').value;
+      const zip = document.getElementById('zip').value;
+
+      try {
+        const res = await fetch('/api/auth/signup', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ name, email, phone, password, street, city, zip })
+        });
+        const data = await res.json();
+        if (data.success) {
+          localStorage.setItem('bakery_token', data.token);
+          localStorage.setItem('bakery_user', JSON.stringify(data.user));
+          // Directly open user profile page
+          window.location.href = '/pages/profile.html';
+        } else {
+          alert('Signup Error: ' + data.message);
+        }
+      } catch (err) {
+        alert('Signup failed.');
+      }
+    });
+  </script>
+</body>
+</html>

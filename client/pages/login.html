@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Login | Sweet Delight Bakery</title>
+  <link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+
+  <!-- Sticky Navbar -->
+  <nav class="navbar glass-panel">
+    <a href="/" class="nav-brand">🍰 Sweet <span>Delight</span></a>
+    <div class="nav-actions">
+      <button onclick="toggleTheme()" class="theme-toggle-btn" id="theme-toggle-btn">🌙</button>
+      <a href="/" class="btn btn-outline btn-sm">Home</a>
+    </div>
+  </nav>
+
+  <div class="auth-container">
+    <div class="auth-card glass-panel">
+      <div style="text-align: center; margin-bottom: 24px;">
+        <h2 class="font-heading" style="font-size: 2rem; color: var(--text-primary);">Sign In</h2>
+        <p style="color: var(--text-secondary); font-size: 0.9rem;">Sign in to your bakery account</p>
+      </div>
+
+      <form id="login-form">
+        <div class="form-group">
+          <label for="email">User ID / Email</label>
+          <input type="email" id="email" class="form-control" placeholder="user@gmail.com" required autofocus>
+        </div>
+
+        <div class="form-group">
+          <label for="password">Password</label>
+          <input type="password" id="password" class="form-control" placeholder="••••••••" required>
+        </div>
+
+        <button type="submit" class="btn btn-chocolate" style="width: 100%; margin-top: 10px;">Sign In</button>
+      </form>
+
+      <div style="margin-top: 20px; display: flex; justify-content: space-between; font-size: 0.85rem;">
+        <a href="#" onclick="openForgotPasswordModal()" style="color: var(--gold-accent);">Forgot Password?</a>
+        <a href="/pages/signup.html" style="color: var(--text-secondary);">New customer? <strong>Create Account</strong></a>
+      </div>
+    </div>
+  </div>
+
+  <!-- Forgot Password Modal -->
+  <div class="modal-overlay" id="forgot-modal">
+    <div class="modal-card glass-panel">
+      <button class="modal-close" onclick="closeModal()">&times;</button>
+      <h3 style="margin-bottom: 14px;" class="font-heading">Reset Password</h3>
+      <form id="forgot-form">
+        <div class="form-group">
+          <label>Your Email Address</label>
+          <input type="email" id="forgot-email" class="form-control" required placeholder="user@gmail.com">
+        </div>
+        <div class="form-group">
+          <label>New Password</label>
+          <input type="password" id="forgot-new-pass" class="form-control" required placeholder="••••••••">
+        </div>
+        <button type="submit" class="btn btn-gold" style="width: 100%;">Update Password</button>
+      </form>
+    </div>
+  </div>
+
+  <script src="/js/auth.js"></script>
+  <script>
+    document.getElementById('login-form').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const email = document.getElementById('email').value;
+      const password = document.getElementById('password').value;
+
+      try {
+        const res = await fetch('/api/auth/login', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ email, password })
+        });
+        const data = await res.json();
+        if (data.success) {
+          localStorage.setItem('bakery_token', data.token);
+          localStorage.setItem('bakery_user', JSON.stringify(data.user));
+          
+          if (data.user.role === 'admin') {
+            window.location.href = '/pages/dashboard.html';
+          } else {
+            window.location.href = '/pages/profile.html';
+          }
+        } else {
+          alert(data.message);
+        }
+      } catch (err) {
+        alert('Login failed. Please check network connection.');
+      }
+    });
+
+    function openForgotPasswordModal() {
+      document.getElementById('forgot-modal').classList.add('open');
+    }
+    function closeModal() {
+      document.querySelectorAll('.modal-overlay').forEach(m => m.classList.remove('open'));
+    }
+
+    document.getElementById('forgot-form').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const email = document.getElementById('forgot-email').value;
+      const newPassword = document.getElementById('forgot-new-pass').value;
+
+      const res = await fetch('/api/auth/forgot-password', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email, newPassword })
+      });
+      const data = await res.json();
+      alert(data.message);
+      if (data.success) closeModal();
+    });
+  </script>
+</body>
+</html>

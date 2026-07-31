@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Sweet Delight Bakery | Fresh Cakes & Gourmet Treats Every Day</title>
+  <meta name="description" content="Order freshly baked artisanal cakes, pastries, cookies, donuts, and pizzas from Sweet Delight Bakery. Live tracking & real-time updates.">
+  <link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+
+  <!-- Sticky Navbar -->
+  <nav class="navbar glass-panel">
+    <a href="/" class="nav-brand">
+      🍰 Sweet <span>Delight</span>
+    </a>
+
+    <ul class="nav-links">
+      <li><a href="/" class="active">Home</a></li>
+      <li><a href="#menu-section">Our Menu</a></li>
+      <li><a href="#offers-section">Offers</a></li>
+      <li><a href="/pages/profile.html">My Orders</a></li>
+    </ul>
+
+    <div class="nav-actions">
+      <button onclick="toggleTheme()" class="theme-toggle-btn" id="theme-toggle-btn" title="Toggle Theme">🌙</button>
+      <a href="/pages/cart.html" class="cart-icon-btn" title="View Cart">
+        🛒
+        <span class="cart-badge" id="cart-badge">0</span>
+      </a>
+      <div id="nav-user-actions" style="display: flex; gap: 10px;"></div>
+    </div>
+  </nav>
+
+  <!-- Hero Section -->
+  <section class="hero-section">
+    <div class="hero-content">
+      <h1>Welcome to <span>Sweet Delight</span> Bakery</h1>
+      <p>Freshly baked cakes, buttery croissants, & handcrafted chocolates created daily with organic ingredients and infinite love.</p>
+      <div style="display: flex; gap: 16px; align-items: center;">
+        <a href="#menu-section" class="btn btn-gold">Explore Menu 🎂</a>
+        <a href="/pages/cart.html" class="btn btn-chocolate">Shop Now 🛒</a>
+      </div>
+      <div class="hero-badges">
+        <div class="hero-badge-item">⚡ 30-Min Fast Delivery</div>
+        <div class="hero-badge-item">⭐ 4.9+ Top Rated</div>
+        <div class="hero-badge-item">🌿 100% Eggless Options</div>
+      </div>
+    </div>
+    <div class="hero-image-wrapper">
+      <img src="https://images.unsplash.com/photo-1578985545062-69928b1d9587?auto=format&fit=crop&w=800&q=80" alt="Fresh Chocolate Cake">
+    </div>
+  </section>
+
+  <!-- Categories Scroll Bar -->
+  <section class="category-bar-section">
+    <h3 style="margin-bottom: 14px;" class="font-heading">Browse Categories</h3>
+    <div class="category-scroll" id="categories-container">
+      <button class="category-chip active" onclick="selectCategory('All', this)">✨ All Items</button>
+      <button class="category-chip" onclick="selectCategory('Cakes', this)">🍰 Cakes</button>
+      <button class="category-chip" onclick="selectCategory('Pastries', this)">🥮 Pastries</button>
+      <button class="category-chip" onclick="selectCategory('Cookies', this)">🍪 Cookies</button>
+      <button class="category-chip" onclick="selectCategory('Donuts', this)">🍩 Donuts</button>
+      <button class="category-chip" onclick="selectCategory('Brownies', this)">🍫 Brownies</button>
+      <button class="category-chip" onclick="selectCategory('Cupcakes', this)">🧁 Cupcakes</button>
+      <button class="category-chip" onclick="selectCategory('Bread', this)">🥖 Bread</button>
+      <button class="category-chip" onclick="selectCategory('Pizza', this)">🍕 Pizza</button>
+      <button class="category-chip" onclick="selectCategory('Sandwich', this)">🥪 Sandwich</button>
+      <button class="category-chip" onclick="selectCategory('Puff', this)">🥟 Puff</button>
+      <button class="category-chip" onclick="selectCategory('Muffins', this)">🥧 Muffins</button>
+      <button class="category-chip" onclick="selectCategory('Chocolates', this)">🍫 Chocolates</button>
+      <button class="category-chip" onclick="selectCategory('Birthday Cakes', this)">🎂 Birthday Cakes</button>
+      <button class="category-chip" onclick="selectCategory('Anniversary Cakes', this)">💍 Anniversary Cakes</button>
+      <button class="category-chip" onclick="selectCategory('Wedding Cakes', this)">👰 Wedding Cakes</button>
+      <button class="category-chip" onclick="selectCategory('Ice Cream Cake', this)">🍦 Ice Cream Cake</button>
+      <button class="category-chip" onclick="selectCategory('Dry Cake', this)">🥮 Dry Cake</button>
+    </div>
+  </section>
+
+  <!-- Search & Filter Toolbar -->
+  <section class="toolbar-section">
+    <div class="search-box">
+      <span class="search-icon">🔍</span>
+      <input type="text" id="search-input" placeholder="Search chocolate cake, red velvet, cookies, croissant...">
+    </div>
+    <div class="filter-selects">
+      <select id="sort-select" class="select-custom">
+        <option value="newest">Newest First</option>
+        <option value="price-low">Price: Low to High</option>
+        <option value="price-high">Price: High to Low</option>
+        <option value="rating">Top Rated</option>
+        <option value="popular">Most Popular</option>
+      </select>
+
+      <select id="rating-select" class="select-custom">
+        <option value="">All Ratings</option>
+        <option value="4.5">4.5★ & Above</option>
+        <option value="4.8">4.8★ & Above</option>
+      </select>
+    </div>
+  </section>
+
+  <!-- Product Catalog Grid -->
+  <section class="products-section" id="menu-section">
+    <div class="section-header">
+      <h2 class="section-title">Fresh Bakery Products</h2>
+    </div>
+    <div class="product-grid" id="product-grid">
+      <!-- Dynamic JS Content -->
+    </div>
+  </section>
+
+  <!-- Special Offers & Promo Codes Section -->
+  <section class="offers-section" id="offers-section">
+    <div class="section-header">
+      <h2 class="section-title">Special Offers & Promo Codes 🎉</h2>
+    </div>
+    <div class="offers-grid" id="offers-grid">
+      <!-- Dynamic JS Offers -->
+    </div>
+  </section>
+
+  <!-- Quick Product Details Modal -->
+  <div class="modal-overlay" id="product-details-modal">
+    <div class="modal-card glass-panel">
+      <button class="modal-close" onclick="closeModal()">&times;</button>
+      <div id="modal-details-content"></div>
+    </div>
+  </div>
+
+  <!-- Footer -->
+  <footer style="padding: 40px 5%; text-align: center; border-top: 1px solid var(--border-color); color: var(--text-light); font-size: 0.9rem;">
+    <p>© 2026 Sweet Delight Bakery Management System. All Rights Reserved.</p>
+    <p style="margin-top: 6px;">Made with 🤎 for bakery lovers worldwide.</p>
+  </footer>
+
+  <!-- Scripts -->
+  <script src="/socket.io/socket.io.js"></script>
+  <script src="/js/auth.js"></script>
+  <script src="/js/cart.js"></script>
+  <script src="/js/socket-client.js"></script>
+  <script src="/js/app.js"></script>
+</body>
+</html>

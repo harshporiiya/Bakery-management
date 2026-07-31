@@ -1,0 +1,207 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>My Orders & Profile | Sweet Delight Bakery</title>
+  <link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+
+  <!-- Sticky Navbar -->
+  <nav class="navbar glass-panel">
+    <a href="/" class="nav-brand">🍰 Sweet <span>Delight</span></a>
+    <ul class="nav-links">
+      <li><a href="/">Home</a></li>
+      <li><a href="/#menu-section">Menu</a></li>
+      <li><a href="/pages/profile.html" class="active">My Profile</a></li>
+    </ul>
+    <div class="nav-actions">
+      <button onclick="toggleTheme()" class="theme-toggle-btn" id="theme-toggle-btn">🌙</button>
+      <a href="/pages/cart.html" class="cart-icon-btn">
+        🛒 <span class="cart-badge" id="cart-badge">0</span>
+      </a>
+      <div id="nav-user-actions"></div>
+    </div>
+  </nav>
+
+  <div style="padding: 20px 5% 60px 5%; display: grid; grid-template-columns: 1fr 2.5fr; gap: 28px;">
+    
+    <!-- Left Column: Customer Profile & Saved Address Details -->
+    <div class="glass-panel" style="padding: 28px; height: max-content;">
+      <div style="text-align: center; margin-bottom: 20px;">
+        <img id="user-avatar" src="https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?auto=format&fit=crop&w=150&q=80" style="width: 90px; height: 90px; border-radius: 50%; object-fit: cover; border: 3px solid var(--gold-accent);">
+        <h3 id="user-name" class="font-heading" style="margin-top: 10px;">Customer Name</h3>
+        <p id="user-email" style="font-size: 0.85rem; color: var(--text-light);">customer@example.com</p>
+      </div>
+
+      <div style="background: var(--light-gold); padding: 14px; border-radius: var(--radius-sm); text-align: center; margin-bottom: 20px;">
+        <div style="font-size: 0.8rem; font-weight: 700; color: #8B4513;">REWARD POINTS BALANCE</div>
+        <div id="user-points" style="font-size: 1.8rem; font-weight: 800; color: var(--gold-accent);">🏆 50 Pts</div>
+      </div>
+
+      <h4 style="font-weight: 700; margin-bottom: 12px; font-size: 0.95rem;">Saved Address & Account Info</h4>
+
+      <form id="profile-update-form">
+        <div class="form-group">
+          <label>Phone Number</label>
+          <input type="text" id="prof-phone" class="form-control" placeholder="+91 9876543210">
+        </div>
+        <div class="form-group">
+          <label>Street / House Address</label>
+          <input type="text" id="prof-street" class="form-control" placeholder="12 Bakery Lane">
+        </div>
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
+          <div class="form-group">
+            <label>City</label>
+            <input type="text" id="prof-city" class="form-control" placeholder="Ahmedabad">
+          </div>
+          <div class="form-group">
+            <label>Pincode</label>
+            <input type="text" id="prof-zip" class="form-control" placeholder="380001">
+          </div>
+        </div>
+        <button type="submit" class="btn btn-gold btn-sm" style="width: 100%;">Save Address Info</button>
+      </form>
+    </div>
+
+    <!-- Right Column: Active Orders & Live Timeline -->
+    <div class="glass-panel" style="padding: 28px;">
+      <h2 class="font-heading" style="margin-bottom: 20px;">Your Orders & Real-Time Tracking 🚚</h2>
+      <div id="my-orders-container">
+        <!-- Dynamic Orders List -->
+      </div>
+    </div>
+
+  </div>
+
+  <script src="/socket.io/socket.io.js"></script>
+  <script src="/js/auth.js"></script>
+  <script src="/js/cart.js"></script>
+  <script src="/js/socket-client.js"></script>
+  <script>
+    const orderSteps = ['Pending', 'Preparing', 'Baking', 'Packed', 'Out for Delivery', 'Delivered'];
+
+    async function loadUserProfile() {
+      const user = getCurrentUser();
+      if (!user) {
+        window.location.href = '/pages/login.html';
+        return;
+      }
+
+      document.getElementById('user-name').textContent = user.name;
+      document.getElementById('user-email').textContent = user.email;
+      document.getElementById('user-points').textContent = `🏆 ${user.rewardPoints || 50} Pts`;
+      if (user.phone) document.getElementById('prof-phone').value = user.phone;
+      if (user.address) {
+        document.getElementById('prof-street').value = user.address.street || '';
+        document.getElementById('prof-city').value = user.address.city || '';
+        document.getElementById('prof-zip').value = user.address.zip || '';
+      }
+    }
+
+    async function loadMyOrdersList() {
+      const container = document.getElementById('my-orders-container');
+      if (!container) return;
+
+      try {
+        const token = getAuthToken();
+        const res = await fetch('/api/orders/my-orders', {
+          headers: { 'Authorization': `Bearer ${token}` }
+        });
+        const data = await res.json();
+
+        if (data.success && data.orders.length > 0) {
+          container.innerHTML = data.orders.map(order => {
+            const currentStepIdx = orderSteps.indexOf(order.orderStatus);
+
+            return `
+              <div style="background: var(--card-bg); border: 1px solid var(--border-color); border-radius: var(--radius-md); padding: 24px; margin-bottom: 24px;">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 14px;">
+                  <div>
+                    <h3 style="font-size: 1.15rem;">Order #${order.orderNumber}</h3>
+                    <div style="font-size: 0.8rem; color: var(--text-light);">${new Date(order.createdAt).toLocaleString('en-IN')}</div>
+                  </div>
+                  <div>
+                    <span style="padding: 6px 14px; border-radius: 50px; background: var(--gold-accent); color: #FFF; font-weight: 700; font-size: 0.85rem;">
+                      ${order.orderStatus}
+                    </span>
+                    <a href="/api/orders/invoice/${order._id}" target="_blank" class="btn btn-outline btn-sm" style="margin-left: 10px;">
+                      📄 PDF Bill
+                    </a>
+                  </div>
+                </div>
+
+                <!-- Order Timeline Stepper -->
+                <div class="timeline-stepper">
+                  ${orderSteps.map((step, idx) => {
+                    const isDone = idx <= currentStepIdx;
+                    const isActive = idx === currentStepIdx;
+                    return `
+                      <div class="timeline-step ${isDone ? 'completed' : ''} ${isActive ? 'active' : ''}">
+                        <div class="step-circle">${isDone ? '✓' : (idx + 1)}</div>
+                        <span class="step-title">${step}</span>
+                      </div>
+                    `;
+                  }).join('')}
+                </div>
+
+                <!-- Ordered Items List -->
+                <div style="border-top: 1px solid var(--border-color); padding-top: 14px; margin-top: 14px;">
+                  ${order.items.map(item => `
+                    <div style="display: flex; justify-content: space-between; font-size: 0.9rem; margin-bottom: 6px;">
+                      <span>${item.name} (${item.weight}) x ${item.quantity}</span>
+                      <strong>₹${(item.price * item.quantity).toFixed(2)}</strong>
+                    </div>
+                  `).join('')}
+                  <div style="display: flex; justify-content: space-between; font-size: 1.1rem; font-weight: 800; margin-top: 10px; color: var(--gold-accent);">
+                    <span>Grand Total Paid</span>
+                    <span>₹${order.grandTotal.toFixed(2)} (${order.paymentMethod})</span>
+                  </div>
+                </div>
+              </div>
+            `;
+          }).join('');
+        } else {
+          container.innerHTML = `
+            <div style="text-align: center; padding: 40px; color: var(--text-light);">
+              <h3>No past orders found</h3>
+              <p style="margin-top: 8px;">Order fresh cakes today and track their baking process in real-time!</p>
+              <a href="/" class="btn btn-gold" style="margin-top: 16px;">Explore Bakery Menu</a>
+            </div>
+          `;
+        }
+      } catch (err) {
+        console.error('Error fetching customer orders:', err);
+      }
+    }
+
+    document.getElementById('profile-update-form').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const phone = document.getElementById('prof-phone').value;
+      const street = document.getElementById('prof-street').value;
+      const city = document.getElementById('prof-city').value;
+      const zip = document.getElementById('prof-zip').value;
+
+      const token = getAuthToken();
+      const res = await fetch('/api/auth/profile', {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
+        body: JSON.stringify({ phone, street, city, zip })
+      });
+      const data = await res.json();
+      if (data.success) {
+        showToast('Address & Account details saved!');
+        localStorage.setItem('bakery_user', JSON.stringify(data.user));
+      }
+    });
+
+    window.loadMyOrdersList = loadMyOrdersList;
+
+    document.addEventListener('DOMContentLoaded', () => {
+      loadUserProfile();
+      loadMyOrdersList();
+    });
+  </script>
+</body>
+</html>

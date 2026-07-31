@@ -1,0 +1,33 @@
+{
+  "name": "bakery-management-system",
+  "version": "1.0.0",
+  "description": "Sweet Delight Bakery Management System with Real-Time Socket.IO, Glassmorphism UI, PDF Invoices & Admin Dashboard",
+  "main": "server/server.js",
+  "scripts": {
+    "start": "node server/server.js",
+    "dev": "node server/server.js"
+  },
+  "keywords": [
+    "bakery",
+    "management",
+    "socket.io",
+    "express",
+    "nodejs",
+    "mongodb",
+    "glassmorphism"
+  ],
+  "author": "Sweet Delight Team",
+  "license": "ISC",
+  "dependencies": {
+    "bcryptjs": "^3.0.3",
+    "cors": "^2.8.5",
+    "dotenv": "^17.0.1",
+    "express": "^4.21.2",
+    "jsonwebtoken": "^9.0.2",
+    "mongoose": "^9.9.0",
+    "multer": "^1.4.5-lts.1",
+    "pdfkit": "^0.17.2",
+    "qrcode": "^1.5.4",
+    "socket.io": "^4.8.1"
+  }
+}
