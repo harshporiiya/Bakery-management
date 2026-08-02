@@ -20,10 +20,48 @@ function initSocketConnection() {
     }
   });
 
-  // Real-Time Product Price / Stock / Details Updated by Owner
+  // Real-Time Product Price / Stock / Details Updated by Owner / Orders
   socket.on('product_updated', (data) => {
     console.log('🔄 Real-Time Product Updated:', data);
-    showToast(`✨ Price/Stock updated for "${data.product.name}"`);
+    if (data.product) {
+      const p = data.product;
+      const effectivePrice = p.discount > 0
+        ? parseFloat((p.price - (p.price * p.discount / 100)).toFixed(2))
+        : p.price;
+
+      showToast(`✨ Price/Stock updated for "${p.name}" (Now ₹${effectivePrice}, ${p.stock} in stock)`);
+
+      // Update local cart if product exists in cart
+      try {
+        let cart = JSON.parse(localStorage.getItem('bakery_cart') || '[]');
+        let updated = false;
+        let priceChanged = false;
+
+        cart.forEach(item => {
+          if (String(item.productId) === String(p._id || p.id)) {
+            if (item.price !== effectivePrice) {
+              item.price = effectivePrice;
+              priceChanged = true;
+            }
+            item.stock = p.stock;
+            if (p.name) item.name = p.name;
+            if (p.image) item.image = p.image;
+            updated = true;
+          }
+        });
+
+        if (updated) {
+          localStorage.setItem('bakery_cart', JSON.stringify(cart));
+          if (priceChanged && typeof showToast === 'function') {
+            showToast(`🏷️ Price updated for "${p.name}" in your cart to ₹${effectivePrice}!`);
+          }
+          if (window.renderCartPage) window.renderCartPage();
+        }
+      } catch (e) {
+        console.error('Cart sync error:', e);
+      }
+    }
+
     if (window.loadProductsList) {
       window.loadProductsList();
     }

@@ -68,17 +68,17 @@ function renderSalesChart(charts) {
           <stop offset="100%" stop-color="#D4AF37" stop-opacity="0.0"/>
         </linearGradient>
       </defs>
-      <polyline fill="url(#chartGradient)" stroke="none" points="20,${height} ${points} ${width-20},${height}" />
+      <polyline fill="url(#chartGradient)" stroke="none" points="20,${height} ${points} ${width - 20},${height}" />
       <polyline fill="none" stroke="#D4AF37" stroke-width="3" points="${points}" />
       ${charts.sales.map((val, idx) => {
-        const x = (idx / (charts.sales.length - 1)) * (width - 40) + 20;
-        const y = height - ((val / (maxVal || 1)) * (height - 40)) - 20;
-        return `
+    const x = (idx / (charts.sales.length - 1)) * (width - 40) + 20;
+    const y = height - ((val / (maxVal || 1)) * (height - 40)) - 20;
+    return `
           <circle cx="${x}" cy="${y}" r="5" fill="#3D2314" stroke="#D4AF37" stroke-width="2" />
           <text x="${x}" y="${y - 10}" fill="var(--text-primary)" font-size="10" text-anchor="middle">₹${val}</text>
           <text x="${x}" y="${height + 15}" fill="var(--text-light)" font-size="10" text-anchor="middle">${charts.labels[idx]}</text>
         `;
-      }).join('')}
+  }).join('')}
     </svg>
   `;
 }
@@ -97,7 +97,7 @@ async function loadAdminProducts() {
         <tr>
           <td>
             <div style="display: flex; align-items: center; gap: 10px;">
-              <img src="${p.image}" style="width: 44px; height: 44px; border-radius: 8px; object-fit: cover;">
+              <img src="${p.image}" onerror="this.onerror=null; this.src='https://images.unsplash.com/photo-1578985545062-69928b1d9587?auto=format&fit=crop&w=600&q=80'" style="width: 44px; height: 44px; border-radius: 8px; object-fit: cover;">
               <div>
                 <strong>${p.name}</strong>
                 <div style="font-size: 0.75rem; color: var(--text-light);">${p.category} | ${p.weight}</div>
@@ -110,7 +110,9 @@ async function loadAdminProducts() {
           <td>
             <input type="number" value="${p.stock}" style="width: 70px; padding: 4px 8px; border-radius: 6px; border: 1px solid var(--border-color);" onchange="quickUpdateProductStock('${p._id}', this.value)">
           </td>
-          <td>${p.discount}%</td>
+          <td>
+            <input type="number" value="${p.discount || 0}" min="0" max="100" style="width: 65px; padding: 4px 8px; border-radius: 6px; border: 1px solid var(--border-color);" onchange="quickUpdateProductDiscount('${p._id}', this.value)"> %
+          </td>
           <td>
             <button onclick="toggleProductEnable('${p._id}', ${!p.isEnabled})" class="btn btn-sm ${p.isEnabled ? 'btn-outline' : 'btn-chocolate'}">
               ${p.isEnabled ? 'Active' : 'Disabled'}
@@ -135,6 +137,16 @@ async function quickUpdateProductPrice(id, newPrice) {
     body: JSON.stringify({ price: newPrice })
   });
   showToast('Price updated live!');
+}
+
+async function quickUpdateProductDiscount(id, newDiscount) {
+  const token = getAuthToken();
+  await fetch(`/api/products/${id}`, {
+    method: 'PUT',
+    headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
+    body: JSON.stringify({ discount: newDiscount })
+  });
+  showToast(`Discount updated to ${newDiscount}% live!`);
 }
 
 async function quickUpdateProductStock(id, newStock) {

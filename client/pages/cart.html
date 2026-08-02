@@ -64,7 +64,17 @@
       <h3 class="font-heading" style="margin-bottom: 18px;">Order Summary</h3>
       
       <div class="summary-row">
-        <span>Items Subtotal</span>
+        <span>Original Items Total</span>
+        <span id="sum-original-subtotal">₹0</span>
+      </div>
+
+      <div class="summary-row" id="product-discount-row" style="color: #E74C3C; display: none;">
+        <span>Item Discounts</span>
+        <span id="sum-product-discount">-₹0</span>
+      </div>
+
+      <div class="summary-row" style="font-weight: 600;">
+        <span>Net Subtotal</span>
         <span id="sum-subtotal">₹0</span>
       </div>
 
@@ -79,7 +89,7 @@
       </div>
 
       <div class="summary-row" id="discount-row" style="color: var(--warm-accent); display: none;">
-        <span>Promo Discount</span>
+        <span>Promo Coupon Discount</span>
         <span id="sum-discount">-₹0</span>
       </div>
 
@@ -136,33 +146,59 @@
         return;
       }
 
-      tbody.innerHTML = cart.map(item => `
-        <tr>
-          <td>
-            <div class="cart-item-info">
-              <img src="${item.image}" alt="${item.name}">
-              <div>
-                <strong>${item.name}</strong>
-                <div style="font-size: 0.8rem; color: var(--text-light);">Weight: ${item.weight}</div>
+      tbody.innerHTML = cart.map(item => {
+        const origPrice = item.originalPrice !== undefined ? item.originalPrice : item.price;
+        const discountPercent = item.discount || 0;
+        const discountAmt = item.discountAmount || 0;
+        const hasDiscount = discountPercent > 0;
+
+        return `
+          <tr>
+            <td>
+              <div class="cart-item-info">
+                <img src="${item.image}" alt="${item.name}" onerror="this.onerror=null; this.src='https://images.unsplash.com/photo-1578985545062-69928b1d9587?auto=format&fit=crop&w=600&q=80'">
+                <div>
+                  <strong>${item.name}</strong>
+                  <div style="font-size: 0.8rem; color: var(--text-light);">Weight: ${item.weight}</div>
+                  ${item.stock !== undefined ? `<div style="font-size: 0.75rem; color: ${item.stock <= 5 ? '#E74C3C' : 'var(--text-light)'}; font-weight: 600; margin-top: 2px;">📦 Available Stock: ${item.stock}</div>` : ''}
+                </div>
               </div>
-            </div>
-          </td>
-          <td>₹${item.price}</td>
-          <td>
-            <div class="qty-control">
-              <button class="qty-btn" onclick="updateCartQuantity('${item.productId}', ${item.quantity - 1})">-</button>
-              <span>${item.quantity}</span>
-              <button class="qty-btn" onclick="updateCartQuantity('${item.productId}', ${item.quantity + 1})">+</button>
-            </div>
-          </td>
-          <td><strong>₹${(item.price * item.quantity).toFixed(2)}</strong></td>
-          <td>
-            <button onclick="removeFromCart('${item.productId}')" style="background: none; border: none; color: #E74C3C; font-size: 1.2rem; cursor: pointer;">🗑️</button>
-          </td>
-        </tr>
-      `).join('');
+            </td>
+            <td>
+              ${hasDiscount ? `
+                <div style="font-size: 0.85rem; text-decoration: line-through; color: var(--text-light);">₹${origPrice}</div>
+                <div style="background: rgba(231, 76, 60, 0.12); color: #E74C3C; font-size: 0.72rem; font-weight: 700; padding: 2px 6px; border-radius: 4px; display: inline-block; margin: 2px 0;">${discountPercent}% OFF (-₹${discountAmt})</div>
+                <div style="font-weight: 700; color: var(--gold-accent);">₹${item.price}</div>
+              ` : `
+                <div style="font-weight: 700;">₹${item.price}</div>
+              `}
+            </td>
+            <td>
+              <div class="qty-control">
+                <button class="qty-btn" onclick="updateCartQuantity('${item.productId}', ${item.quantity - 1})">-</button>
+                <span>${item.quantity}</span>
+                <button class="qty-btn" onclick="updateCartQuantity('${item.productId}', ${item.quantity + 1})">+</button>
+              </div>
+            </td>
+            <td><strong>₹${(item.price * item.quantity).toFixed(2)}</strong></td>
+            <td>
+              <button onclick="removeFromCart('${item.productId}')" style="background: none; border: none; color: #E74C3C; font-size: 1.2rem; cursor: pointer;">🗑️</button>
+            </td>
+          </tr>
+        `;
+      }).join('');
 
       const totals = calculateCartTotals();
+
+      document.getElementById('sum-original-subtotal').textContent = `₹${(totals.originalSubtotal || totals.subtotal).toFixed(2)}`;
+
+      if (totals.productDiscountTotal > 0) {
+        document.getElementById('product-discount-row').style.display = 'flex';
+        document.getElementById('sum-product-discount').textContent = `-₹${totals.productDiscountTotal.toFixed(2)}`;
+      } else {
+        document.getElementById('product-discount-row').style.display = 'none';
+      }
+
       document.getElementById('sum-subtotal').textContent = `₹${totals.subtotal.toFixed(2)}`;
       document.getElementById('sum-gst').textContent = `₹${totals.gst.toFixed(2)}`;
       document.getElementById('sum-delivery').textContent = `₹${totals.deliveryCharge.toFixed(2)}`;
@@ -171,6 +207,8 @@
       if (totals.discount > 0) {
         document.getElementById('discount-row').style.display = 'flex';
         document.getElementById('sum-discount').textContent = `-₹${totals.discount.toFixed(2)}`;
+      } else {
+        document.getElementById('discount-row').style.display = 'none';
       }
     }
 
@@ -186,15 +224,21 @@
     }
 
     async function processCheckout() {
-      const cart = getCart();
-      if (cart.length === 0) {
-        alert('Cart is empty.');
+      if (!isLoggedIn()) {
+        alert('⚠️ You must register an account first to make an order!');
+        window.location.href = '/pages/signup.html';
         return;
       }
 
-      if (!isLoggedIn()) {
-        alert('Please login to place your order.');
-        window.location.href = '/pages/login.html';
+      // Sync latest prices and stock from server before processing order
+      if (window.syncCartWithLatestPrices) {
+        await window.syncCartWithLatestPrices();
+        renderCartPage();
+      }
+
+      const cart = getCart();
+      if (cart.length === 0) {
+        alert('Cart is empty.');
         return;
       }
 
@@ -238,7 +282,25 @@
             window.location.href = '/pages/profile.html';
           }, 1000);
         } else {
-          alert('Checkout Error: ' + data.message);
+          // If server reports stock limits, show alert and sync stock with local cart
+          alert(`⚠️ Server Alert: ${data.message}`);
+          showToast(`❌ ${data.message}`);
+
+          if (data.productId && data.availableStock !== undefined) {
+            let currentCart = getCart();
+            const idx = currentCart.findIndex(i => String(i.productId) === String(data.productId));
+            if (idx !== -1) {
+              currentCart[idx].stock = data.availableStock;
+              if (currentCart[idx].quantity > data.availableStock) {
+                currentCart[idx].quantity = data.availableStock;
+              }
+              if (data.availableStock <= 0) {
+                currentCart = currentCart.filter(i => String(i.productId) !== String(data.productId));
+              }
+              saveCart(currentCart);
+            }
+          }
+          renderCartPage();
         }
       } catch (err) {
         alert('Error placing order.');
@@ -248,12 +310,22 @@
     window.renderCartPage = renderCartPage;
 
     document.addEventListener('DOMContentLoaded', () => {
+      if (!isLoggedIn()) {
+        alert('⚠️ You must register an account first to make an order!');
+        window.location.href = '/pages/signup.html';
+        return;
+      }
+
       const user = getCurrentUser();
       if (user) {
         document.getElementById('cust-name').value = user.name || '';
         document.getElementById('cust-phone').value = user.phone || '';
       }
       renderCartPage();
+
+      if (window.syncCartWithLatestPrices) {
+        window.syncCartWithLatestPrices().then(() => renderCartPage());
+      }
     });
   </script>
 </body>

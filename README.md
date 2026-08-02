@@ -80,3 +80,7 @@ npx kill-port 5000
 
 then run:
 npm start
+
+admin id and password:
+admin@bakery.com
+admin123

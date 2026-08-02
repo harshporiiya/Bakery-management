@@ -148,12 +148,19 @@
 
                 <!-- Ordered Items List -->
                 <div style="border-top: 1px solid var(--border-color); padding-top: 14px; margin-top: 14px;">
-                  ${order.items.map(item => `
-                    <div style="display: flex; justify-content: space-between; font-size: 0.9rem; margin-bottom: 6px;">
-                      <span>${item.name} (${item.weight}) x ${item.quantity}</span>
-                      <strong>₹${(item.price * item.quantity).toFixed(2)}</strong>
-                    </div>
-                  `).join('')}
+                  ${order.items.map(item => {
+                    const origPrice = item.originalPrice !== undefined ? item.originalPrice : item.price;
+                    const discPercent = item.discount || 0;
+                    return `
+                      <div style="display: flex; justify-content: space-between; font-size: 0.9rem; margin-bottom: 6px;">
+                        <span>${item.name} (${item.weight}) x ${item.quantity} ${discPercent > 0 ? `<span style="color: #E74C3C; font-size: 0.8rem; font-weight: 700;">[${discPercent}% OFF]</span>` : ''}</span>
+                        <span>
+                          ${discPercent > 0 ? `<span style="text-decoration: line-through; color: var(--text-light); font-size: 0.8rem; margin-right: 6px;">₹${(origPrice * item.quantity).toFixed(2)}</span>` : ''}
+                          <strong>₹${(item.price * item.quantity).toFixed(2)}</strong>
+                        </span>
+                      </div>
+                    `;
+                  }).join('')}
                   <div style="display: flex; justify-content: space-between; font-size: 1.1rem; font-weight: 800; margin-top: 10px; color: var(--gold-accent);">
                     <span>Grand Total Paid</span>
                     <span>₹${order.grandTotal.toFixed(2)} (${order.paymentMethod})</span>

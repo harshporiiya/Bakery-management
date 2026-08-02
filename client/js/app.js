@@ -47,13 +47,17 @@ function renderProductsGrid(products) {
   grid.innerHTML = products.map(product => {
     const isOut = product.stock <= 0;
     const isLow = product.stock > 0 && product.stock <= 5;
-    const discountedPrice = product.discount > 0 ? (product.price - (product.price * product.discount / 100)).toFixed(0) : product.price;
+    const origPrice = parseFloat(product.price);
+    const discPercent = product.discount ? parseFloat(product.discount) : 0;
+    const discAmount = discPercent > 0 ? parseFloat((origPrice * discPercent / 100).toFixed(2)) : 0;
+    const discountedPrice = (origPrice - discAmount).toFixed(0);
+    const prodImg = product.image || 'https://images.unsplash.com/photo-1578985545062-69928b1d9587?auto=format&fit=crop&w=600&q=80';
 
     return `
       <div class="product-card glass-panel">
         <div class="product-image-container">
-          <img src="${product.image}" alt="${product.name}" loading="lazy" onerror="this.src='https://images.unsplash.com/photo-1578985545062-69928b1d9587?auto=format&fit=crop&w=600&q=80'">
-          ${product.discount > 0 ? `<span class="discount-badge">${product.discount}% OFF</span>` : ''}
+          <img src="${prodImg}" alt="${product.name}" loading="lazy" onerror="this.onerror=null; this.src='https://images.unsplash.com/photo-1578985545062-69928b1d9587?auto=format&fit=crop&w=600&q=80'">
+          ${discPercent > 0 ? `<span class="discount-badge" style="background: #E74C3C; color: #FFF; font-weight: 800; font-size: 0.8rem; padding: 4px 10px; border-radius: 12px; box-shadow: 0 2px 8px rgba(231,76,60,0.4);">${discPercent}% OFF</span>` : ''}
           <button class="product-favorite-btn" onclick="toggleFavorite('${product._id}')" title="Favorite">❤️</button>
         </div>
         <div class="product-info">
@@ -71,8 +75,13 @@ function renderProductsGrid(products) {
 
           <div class="product-bottom">
             <div class="price-box">
-              <span class="current-price">₹${discountedPrice}</span>
-              ${product.discount > 0 ? `<span class="original-price">₹${product.price}</span>` : ''}
+              <span class="current-price" style="font-size: 1.25rem; font-weight: 800; color: var(--gold-accent);">₹${discountedPrice}</span>
+              ${discPercent > 0 ? `
+                <div style="display: inline-flex; flex-direction: column; align-items: flex-start; margin-left: 8px;">
+                  <span class="original-price" style="text-decoration: line-through; color: var(--text-light); font-size: 0.85rem;">₹${origPrice}</span>
+                  <span style="color: #E74C3C; font-size: 0.72rem; font-weight: 700;">Save ₹${discAmount} (${discPercent}%)</span>
+                </div>
+              ` : ''}
             </div>
             <div class="card-actions">
               <button onclick="openProductModal('${product._id}')" class="btn btn-outline btn-sm">View</button>
@@ -88,6 +97,15 @@ function renderProductsGrid(products) {
 }
 
 function handleAddToCart(productId) {
+  if (typeof isLoggedIn === 'function' && !isLoggedIn()) {
+    alert('⚠️ You must register an account first to add items to cart and place an order!');
+    if (typeof showToast === 'function') {
+      showToast('⚠️ Please register or login first to make an order!');
+    }
+    window.location.href = '/pages/signup.html';
+    return;
+  }
+
   const prod = allProducts.find(p => String(p._id) === String(productId));
   if (prod) {
     addToCart(prod, 1);
@@ -122,11 +140,15 @@ function openProductModal(productId) {
   const modalContent = document.getElementById('modal-details-content');
   if (!modal || !modalContent) return;
 
-  const discountedPrice = prod.discount > 0 ? (prod.price - (prod.price * prod.discount / 100)).toFixed(0) : prod.price;
+  const origPrice = parseFloat(prod.price);
+  const discPercent = prod.discount ? parseFloat(prod.discount) : 0;
+  const discAmount = discPercent > 0 ? parseFloat((origPrice * discPercent / 100).toFixed(2)) : 0;
+  const discountedPrice = (origPrice - discAmount).toFixed(0);
+  const prodImg = prod.image || 'https://images.unsplash.com/photo-1578985545062-69928b1d9587?auto=format&fit=crop&w=600&q=80';
 
   modalContent.innerHTML = `
     <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 24px; align-items: center;">
-      <img src="${prod.image}" style="width: 100%; border-radius: var(--radius-md); object-fit: cover; max-height: 300px;">
+      <img src="${prodImg}" onerror="this.onerror=null; this.src='https://images.unsplash.com/photo-1578985545062-69928b1d9587?auto=format&fit=crop&w=600&q=80'" style="width: 100%; border-radius: var(--radius-md); object-fit: cover; max-height: 300px;">
       <div>
         <span style="font-size: 0.8rem; text-transform: uppercase; color: var(--gold-accent); font-weight: 700;">${prod.category}</span>
         <h2 style="margin: 8px 0;">${prod.name}</h2>
@@ -136,7 +158,10 @@ function openProductModal(productId) {
         <p><strong>Rating:</strong> ⭐ ${prod.rating} / 5</p>
         <div style="margin: 20px 0;">
           <span style="font-size: 1.8rem; font-weight: 800; color: var(--gold-accent);">₹${discountedPrice}</span>
-          ${prod.discount > 0 ? `<span style="text-decoration: line-through; color: var(--text-light); margin-left: 10px;">₹${prod.price}</span>` : ''}
+          ${discPercent > 0 ? `
+            <span style="text-decoration: line-through; color: var(--text-light); margin-left: 10px; font-size: 1.1rem;">₹${origPrice}</span>
+            <span style="background: rgba(231, 76, 60, 0.15); color: #E74C3C; font-weight: 700; font-size: 0.85rem; padding: 4px 8px; border-radius: 6px; margin-left: 8px;">${discPercent}% OFF (Save ₹${discAmount})</span>
+          ` : ''}
         </div>
         <button onclick="handleAddToCart('${prod._id}'); closeModal();" class="btn btn-gold" style="width: 100%;">🛒 Add to Cart Now</button>
       </div>

@@ -40,6 +40,36 @@ exports.createOrder = async (req, res) => {
     };
 
     const isDbConnected = getDbStatus();
+
+    // Validate stock for all items before placing order
+    const updatedProductsList = [];
+    for (const item of items) {
+      if (!item.productId) continue;
+      let product;
+      if (isDbConnected) {
+        product = await Product.findById(item.productId);
+      } else {
+        product = memoryStore.products.find(p => String(p._id) === String(item.productId));
+      }
+
+      if (!product) {
+        return res.status(400).json({
+          success: false,
+          message: `Product "${item.name || 'Item'}" is no longer available.`
+        });
+      }
+
+      if (product.stock < item.quantity) {
+        return res.status(400).json({
+          success: false,
+          message: `Product "${product.name}" is only ${product.stock} available.`,
+          availableStock: product.stock,
+          productId: product._id,
+          productName: product.name
+        });
+      }
+    }
+
     let savedOrder;
 
     if (isDbConnected) {
@@ -49,7 +79,12 @@ exports.createOrder = async (req, res) => {
       // Deduct stock for ordered items
       for (const item of items) {
         if (item.productId) {
-          await Product.findByIdAndUpdate(item.productId, { $inc: { stock: -item.quantity } });
+          const updatedProd = await Product.findByIdAndUpdate(
+            item.productId,
+            { $inc: { stock: -item.quantity } },
+            { new: true }
+          );
+          if (updatedProd) updatedProductsList.push(updatedProd);
         }
       }
     } else {
@@ -61,13 +96,22 @@ exports.createOrder = async (req, res) => {
         const prod = memoryStore.products.find(p => String(p._id) === String(item.productId));
         if (prod) {
           prod.stock = Math.max(0, prod.stock - item.quantity);
+          updatedProductsList.push(prod);
         }
       });
     }
 
-    // Real-Time Socket Notification to Owner / Admin
+    // Real-Time Socket Notification to Owner / Admin and stock update broadcast
     const io = req.app.get('socketio');
     if (io) {
+      // Broadcast updated stock for each ordered item to all connected users
+      updatedProductsList.forEach(updatedProd => {
+        io.emit('product_updated', {
+          product: updatedProd,
+          message: `Stock updated for "${updatedProd.name}". Available stock: ${updatedProd.stock}`
+        });
+      });
+
       io.to('admin_room').emit('new_order_admin', { order: savedOrder, message: `New Order Received! #${savedOrder.orderNumber} (₹${savedOrder.grandTotal})` });
       io.emit('notification', {
         title: 'New Order Received! 🍰',

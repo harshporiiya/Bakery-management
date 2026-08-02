@@ -90,7 +90,15 @@ const generateInvoicePDF = async (order, res, type = 'final') => {
   currentY += 6;
 
   // Render Items List
+  let totalProductDiscount = 0;
   order.items.forEach(item => {
+    const origPrice = item.originalPrice !== undefined ? item.originalPrice : item.price;
+    const discPercent = item.discount || 0;
+    const discAmt = item.discountAmount || 0;
+    if (discAmt > 0) {
+      totalProductDiscount += (discAmt * item.quantity);
+    }
+
     const itemTotal = (item.price * item.quantity).toFixed(2);
     doc
       .undash()
@@ -99,11 +107,22 @@ const generateInvoicePDF = async (order, res, type = 'final') => {
       .fillColor('#222222')
       .text(`${item.name}`, 12, currentY, { width: 125 })
       .font('Helvetica')
-      .text(`(${item.weight || '500g'})`, 12, currentY + 9)
+      .text(`(${item.weight || '500g'}${discPercent > 0 ? ` | ${discPercent}% OFF` : ''})`, 12, currentY + 9);
+
+    if (discPercent > 0) {
+      doc
+        .fontSize(6.5)
+        .fillColor('#E74C3C')
+        .text(`₹${origPrice} - ${discPercent}% (-₹${discAmt})`, 12, currentY + 18);
+    }
+
+    doc
+      .fontSize(7.5)
+      .fillColor('#222222')
       .text(`${item.quantity}`, 140, currentY, { width: 25, align: 'center' })
       .text(`${itemTotal}`, 165, currentY, { width: 50, align: 'right' });
 
-    currentY += 20;
+    currentY += discPercent > 0 ? 28 : 20;
   });
 
   doc.moveTo(10, currentY).dash(3, { space: 2 }).strokeColor('#888888').stroke();
@@ -116,7 +135,7 @@ const generateInvoicePDF = async (order, res, type = 'final') => {
       .fontSize(7.5)
       .font('Helvetica')
       .fillColor('#444444')
-      .text('Subtotal:', 100, currentY, { width: 60, align: 'right' })
+      .text('Net Subtotal:', 100, currentY, { width: 60, align: 'right' })
       .text(`₹${order.subtotal.toFixed(2)}`, 165, currentY, { width: 50, align: 'right' });
     currentY += 12;
 
@@ -127,7 +146,7 @@ const generateInvoicePDF = async (order, res, type = 'final') => {
 
     if (order.discount > 0) {
       doc
-        .text('Discount:', 100, currentY, { width: 60, align: 'right' })
+        .text('Promo Disc:', 100, currentY, { width: 60, align: 'right' })
         .text(`-₹${order.discount.toFixed(2)}`, 165, currentY, { width: 50, align: 'right' });
       currentY += 12;
     }

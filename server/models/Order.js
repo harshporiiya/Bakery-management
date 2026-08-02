@@ -3,7 +3,10 @@ const mongoose = require('mongoose');
 const orderItemSchema = new mongoose.Schema({
   productId: { type: String, required: true },
   name: { type: String, required: true },
-  price: { type: Number, required: true },
+  originalPrice: { type: Number, default: 0 },
+  discount: { type: Number, default: 0 }, // Discount percentage (e.g. 12)
+  discountAmount: { type: Number, default: 0 },
+  price: { type: Number, required: true }, // Final unit price
   quantity: { type: Number, required: true },
   image: { type: String, required: true },
   weight: { type: String, default: '500g' }
