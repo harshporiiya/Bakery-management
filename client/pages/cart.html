@@ -15,10 +15,14 @@
       <li><a href="/">Home</a></li>
       <li><a href="/#menu-section">Menu</a></li>
       <li><a href="/pages/profile.html">My Orders</a></li>
+      <li class="mobile-nav-user-item">
+        <div id="mobile-nav-user-actions" class="mobile-nav-user-section"></div>
+      </li>
     </ul>
     <div class="nav-actions">
       <button onclick="toggleTheme()" class="theme-toggle-btn" id="theme-toggle-btn">🌙</button>
       <div id="nav-user-actions"></div>
+      <button class="nav-toggle-btn" id="mobile-menu-toggle" aria-label="Toggle navigation" aria-expanded="false">☰</button>
     </div>
   </nav>
 
@@ -27,7 +31,7 @@
     <div class="glass-panel" style="padding: 28px;">
       <h2 class="font-heading" style="margin-bottom: 20px;">Your Bakery Order Items</h2>
       
-      <div id="cart-table-wrapper">
+      <div id="cart-table-wrapper" class="cart-table-wrapper">
         <table class="cart-table">
           <thead>
             <tr>
@@ -47,12 +51,12 @@
       <!-- Shipping Address Form -->
       <div style="margin-top: 30px; border-top: 1px solid var(--border-color); padding-top: 20px;">
         <h3 class="font-heading" style="margin-bottom: 12px;">Delivery Address</h3>
-        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px;">
+        <div class="form-grid-2col">
           <input type="text" id="cust-name" class="form-control" placeholder="Full Name" required>
           <input type="tel" id="cust-phone" class="form-control" placeholder="Phone Number" required>
         </div>
         <input type="text" id="street-address" class="form-control" placeholder="Street / House No. / Landmark" style="margin-top: 12px;" required>
-        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-top: 12px;">
+        <div class="form-grid-2col" style="margin-top: 12px;">
           <input type="text" id="city" class="form-control" placeholder="City" value="Ahmedabad">
           <input type="text" id="zip" class="form-control" placeholder="Pincode" value="380001">
         </div>

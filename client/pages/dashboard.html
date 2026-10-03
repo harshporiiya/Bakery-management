@@ -17,20 +17,27 @@
       <li><a href="#orders-section">Orders</a></li>
       <li><a href="#offers-section">Offers</a></li>
       <li><a href="#customers-section">Customers</a></li>
+      <li class="mobile-nav-user-item">
+        <div class="mobile-nav-user-section">
+          <a href="/" class="btn btn-outline btn-sm">Storefront</a>
+          <button onclick="logout()" class="btn btn-chocolate btn-sm">Logout</button>
+        </div>
+      </li>
     </ul>
     <div class="nav-actions">
       <button onclick="toggleTheme()" class="theme-toggle-btn" id="theme-toggle-btn">🌙</button>
       <a href="/" class="btn btn-outline btn-sm">Storefront</a>
       <button onclick="logout()" class="btn btn-chocolate btn-sm">Logout</button>
+      <button class="nav-toggle-btn" id="mobile-menu-toggle" aria-label="Toggle navigation" aria-expanded="false">☰</button>
     </div>
   </nav>
 
-  <div style="padding: 20px 5% 60px 5%;">
+  <div class="dashboard-container">
 
     <!-- Top Action Buttons -->
-    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px;">
+    <div class="dashboard-header">
       <h1 class="font-heading" style="font-size: 2.2rem;">Sweet Delight Control Center</h1>
-      <div style="display: flex; gap: 12px;">
+      <div class="dashboard-header-actions">
         <button onclick="openAddProductModal()" class="btn btn-gold">➕ Add Product</button>
         <button onclick="handleAddCategory()" class="btn btn-outline">🏷️ Categories</button>
         <button onclick="openCreateOfferModal()" class="btn btn-chocolate">🎉 Create / Edit Offer</button>
@@ -221,7 +228,7 @@
           <input type="text" name="name" class="form-control" placeholder="e.g. Belgian Dark Forest Cake" required>
         </div>
 
-        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px;">
+        <div class="form-grid-2col">
           <div class="form-group">
             <label>Category</label>
             <select name="category" class="select-custom" style="width: 100%; border-radius: 50px;" required>
@@ -250,7 +257,7 @@
           </div>
         </div>
 
-        <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 12px;">
+        <div class="form-grid-3col">
           <div class="form-group">
             <label>Price (₹)</label>
             <input type="number" name="price" class="form-control" placeholder="550" required>
@@ -304,7 +311,7 @@
           <label>Description</label>
           <input type="text" id="offer-desc" name="description" class="form-control" placeholder="Get 25% instant discount on orders above ₹400">
         </div>
-        <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 12px;">
+        <div class="form-grid-3col">
           <div class="form-group">
             <label>Discount (%)</label>
             <input type="number" id="offer-discount" name="discountPercentage" class="form-control" placeholder="25" required>

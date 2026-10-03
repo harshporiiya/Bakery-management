@@ -15,6 +15,9 @@
       <li><a href="/">Home</a></li>
       <li><a href="/#menu-section">Menu</a></li>
       <li><a href="/pages/profile.html" class="active">My Profile</a></li>
+      <li class="mobile-nav-user-item">
+        <div id="mobile-nav-user-actions" class="mobile-nav-user-section"></div>
+      </li>
     </ul>
     <div class="nav-actions">
       <button onclick="toggleTheme()" class="theme-toggle-btn" id="theme-toggle-btn">🌙</button>
@@ -22,10 +25,11 @@
         🛒 <span class="cart-badge" id="cart-badge">0</span>
       </a>
       <div id="nav-user-actions"></div>
+      <button class="nav-toggle-btn" id="mobile-menu-toggle" aria-label="Toggle navigation" aria-expanded="false">☰</button>
     </div>
   </nav>
 
-  <div style="padding: 20px 5% 60px 5%; display: grid; grid-template-columns: 1fr 2.5fr; gap: 28px;">
+  <div class="profile-layout-container">
     
     <!-- Left Column: Customer Profile & Saved Address Details -->
     <div class="glass-panel" style="padding: 28px; height: max-content;">
@@ -51,7 +55,7 @@
           <label>Street / House Address</label>
           <input type="text" id="prof-street" class="form-control" placeholder="12 Bakery Lane">
         </div>
-        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
+        <div class="form-grid-2col">
           <div class="form-group">
             <label>City</label>
             <input type="text" id="prof-city" class="form-control" placeholder="Ahmedabad">
@@ -117,33 +121,35 @@
 
             return `
               <div style="background: var(--card-bg); border: 1px solid var(--border-color); border-radius: var(--radius-md); padding: 24px; margin-bottom: 24px;">
-                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 14px;">
+                <div class="order-card-header">
                   <div>
                     <h3 style="font-size: 1.15rem;">Order #${order.orderNumber}</h3>
                     <div style="font-size: 0.8rem; color: var(--text-light);">${new Date(order.createdAt).toLocaleString('en-IN')}</div>
                   </div>
-                  <div>
+                  <div style="display: flex; align-items: center; gap: 8px; flex-wrap: wrap;">
                     <span style="padding: 6px 14px; border-radius: 50px; background: var(--gold-accent); color: #FFF; font-weight: 700; font-size: 0.85rem;">
                       ${order.orderStatus}
                     </span>
-                    <a href="/api/orders/invoice/${order._id}" target="_blank" class="btn btn-outline btn-sm" style="margin-left: 10px;">
+                    <a href="/api/orders/invoice/${order._id}" target="_blank" class="btn btn-outline btn-sm">
                       📄 PDF Bill
                     </a>
                   </div>
                 </div>
 
                 <!-- Order Timeline Stepper -->
-                <div class="timeline-stepper">
-                  ${orderSteps.map((step, idx) => {
-                    const isDone = idx <= currentStepIdx;
-                    const isActive = idx === currentStepIdx;
-                    return `
-                      <div class="timeline-step ${isDone ? 'completed' : ''} ${isActive ? 'active' : ''}">
-                        <div class="step-circle">${isDone ? '✓' : (idx + 1)}</div>
-                        <span class="step-title">${step}</span>
-                      </div>
-                    `;
-                  }).join('')}
+                <div class="timeline-wrapper">
+                  <div class="timeline-stepper">
+                    ${orderSteps.map((step, idx) => {
+                      const isDone = idx <= currentStepIdx;
+                      const isActive = idx === currentStepIdx;
+                      return `
+                        <div class="timeline-step ${isDone ? 'completed' : ''} ${isActive ? 'active' : ''}">
+                          <div class="step-circle">${isDone ? '✓' : (idx + 1)}</div>
+                          <span class="step-title">${step}</span>
+                        </div>
+                      `;
+                    }).join('')}
+                  </div>
                 </div>
 
                 <!-- Ordered Items List -->

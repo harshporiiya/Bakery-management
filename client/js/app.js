@@ -147,7 +147,7 @@ function openProductModal(productId) {
   const prodImg = prod.image || 'https://images.unsplash.com/photo-1578985545062-69928b1d9587?auto=format&fit=crop&w=600&q=80';
 
   modalContent.innerHTML = `
-    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 24px; align-items: center;">
+    <div class="modal-grid-2col">
       <img src="${prodImg}" onerror="this.onerror=null; this.src='https://images.unsplash.com/photo-1578985545062-69928b1d9587?auto=format&fit=crop&w=600&q=80'" style="width: 100%; border-radius: var(--radius-md); object-fit: cover; max-height: 300px;">
       <div>
         <span style="font-size: 0.8rem; text-transform: uppercase; color: var(--gold-accent); font-weight: 700;">${prod.category}</span>

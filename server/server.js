@@ -24,19 +24,15 @@ app.set('socketio', io);
 // Mount socket handlers
 socketHandler(io);
 
-// Start server after DB connection & seed
-const startServer = async () => {
+// Start server immediately, then connect DB & seed
+server.listen(PORT, async () => {
+  console.log(`==================================================`);
+  console.log(`🍰 SWEET DELIGHT BAKERY SERVER RUNNING ON PORT ${PORT}`);
+  console.log(`🌐 Storefront: http://localhost:${PORT}`);
+  console.log(`🔑 Admin Login: http://localhost:${PORT}/pages/login.html`);
+  console.log(`   (Admin Email: admin@bakery.com | Password: admin123)`);
+  console.log(`==================================================`);
+
   await connectDB();
   await seedDatabase();
-
-  server.listen(PORT, () => {
-    console.log(`==================================================`);
-    console.log(`🍰 SWEET DELIGHT BAKERY SERVER RUNNING ON PORT ${PORT}`);
-    console.log(`🌐 Storefront: http://localhost:${PORT}`);
-    console.log(`🔑 Admin Login: http://localhost:${PORT}/pages/login.html`);
-    console.log(`   (Admin Email: admin@bakery.com | Password: admin123)`);
-    console.log(`==================================================`);
-  });
-};
-
-startServer();
+});
