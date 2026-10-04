@@ -1,10 +1,20 @@
 const multer = require('multer');
 const path = require('path');
 const fs = require('fs');
+const os = require('os');
 
-const uploadDir = path.join(__dirname, '../uploads');
-if (!fs.existsSync(uploadDir)) {
-  fs.mkdirSync(uploadDir, { recursive: true });
+// Use /tmp on serverless (Vercel) since the filesystem is read-only
+const isVercel = process.env.VERCEL === '1' || process.env.VERCEL_ENV;
+const uploadDir = isVercel
+  ? path.join(os.tmpdir(), 'uploads')
+  : path.join(__dirname, '../uploads');
+
+try {
+  if (!fs.existsSync(uploadDir)) {
+    fs.mkdirSync(uploadDir, { recursive: true });
+  }
+} catch (err) {
+  console.log('Upload directory warning:', err.message);
 }
 
 const storage = multer.diskStorage({
@@ -36,3 +46,4 @@ const upload = multer({
 });
 
 module.exports = upload;
+
