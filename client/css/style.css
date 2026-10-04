@@ -1202,14 +1202,41 @@ button {
 
 /* ==========================================================================
    RESPONSIVE DESIGN SUITE (Mobile, Tablet, Desktop)
+/* ==========================================================================
+   RESPONSIVE DESIGN SUITE (Desktop, Laptop, Tablet, Mobile)
    ========================================================================== */
+
+/* Large Desktop Max-Width Enclosure */
+.navbar,
+.hero-section,
+.category-bar-section,
+.toolbar-section,
+.products-section,
+.offers-section,
+.reviews-section,
+.cart-container,
+.profile-layout-container,
+.dashboard-container,
+.auth-container {
+  max-width: 1400px;
+  margin-left: auto;
+  margin-right: auto;
+}
 
 /* Tablet & Mobile Screens (<= 860px) */
 @media (max-width: 860px) {
   /* Navbar & Mobile Drawer */
   .navbar {
-    padding: 12px 4%;
+    position: sticky;
+    top: 0;
+    margin: 0;
+    width: 100%;
+    border-radius: 0;
+    padding: 10px 4%;
     margin-bottom: 12px;
+    border-left: none;
+    border-right: none;
+    border-top: none;
   }
 
   .nav-brand {
@@ -1223,7 +1250,7 @@ button {
 
   .nav-links {
     position: fixed;
-    top: 68px;
+    top: 60px;
     left: 0;
     right: 0;
     background: var(--bg-primary);
@@ -1238,7 +1265,7 @@ button {
     pointer-events: none;
     transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.3s ease;
     z-index: 999;
-    max-height: calc(100vh - 70px);
+    max-height: calc(100vh - 60px);
     overflow-y: auto;
   }
 
@@ -1296,10 +1323,10 @@ button {
   /* Hero Section */
   .hero-section {
     grid-template-columns: 1fr;
-    padding: 36px 4% 30px 4%;
-    gap: 28px;
+    padding: 32px 4% 26px 4%;
+    gap: 24px;
     text-align: center;
-    margin-bottom: 24px;
+    margin-bottom: 20px;
   }
 
   .hero-content h1 {
@@ -1321,7 +1348,7 @@ button {
     justify-content: center;
     flex-wrap: wrap;
     gap: 8px;
-    margin-top: 20px;
+    margin-top: 18px;
   }
 
   .hero-badge-item {
@@ -1338,11 +1365,11 @@ button {
   .cart-container {
     grid-template-columns: 1fr;
     padding: 16px 4% 40px 4%;
-    gap: 24px;
+    gap: 22px;
   }
 
   .cart-table {
-    min-width: 520px;
+    min-width: 480px;
   }
 
   /* Admin Dashboard Header & Metrics */
@@ -1406,14 +1433,25 @@ button {
   }
 
   .timeline-stepper {
-    min-width: 520px;
+    min-width: 480px;
   }
 }
 
 /* Medium Mobile Devices & Phablets (<= 640px) */
 @media (max-width: 640px) {
-  /* Hide desktop user actions in top bar on small screens to prevent overflow */
-  #nav-user-actions {
+  /* Prevent horizontal screen bleed */
+  body, html {
+    overflow-x: hidden;
+  }
+
+  /* Ensure inputs have 16px font-size to prevent iOS Safari auto-zoom */
+  .form-control, input, select, textarea {
+    font-size: 16px !important;
+  }
+
+  /* Hide desktop action buttons in top bar on small screens to prevent overflow (except auth home button) */
+  #nav-user-actions,
+  .navbar .nav-actions > .btn:not(.auth-home-btn) {
     display: none !important;
   }
 
@@ -1429,7 +1467,7 @@ button {
 
   /* Search & Filter Toolbar */
   .toolbar-section {
-    padding: 0 4% 20px 4%;
+    padding: 0 4% 18px 4%;
     flex-direction: column;
     align-items: stretch;
     gap: 10px;
@@ -1442,7 +1480,6 @@ button {
 
   .search-box input {
     padding: 12px 18px 12px 40px;
-    font-size: 0.9rem;
   }
 
   .filter-selects {
@@ -1455,20 +1492,20 @@ button {
     flex: 1;
     min-width: 0;
     padding: 10px 12px;
-    font-size: 0.82rem;
+    font-size: 0.85rem !important;
   }
 
   /* Product Catalog Grid */
   .products-section {
-    padding: 0 4% 40px 4%;
+    padding: 0 4% 36px 4%;
   }
 
   .section-header {
-    margin-bottom: 20px;
+    margin-bottom: 18px;
   }
 
   .section-title {
-    font-size: 1.55rem;
+    font-size: 1.5rem;
   }
 
   .product-grid {
@@ -1507,7 +1544,7 @@ button {
 
   /* Offers and Reviews */
   .offers-section, .reviews-section {
-    padding: 0 4% 36px 4%;
+    padding: 0 4% 32px 4%;
   }
 
   .offers-grid, .reviews-grid {
@@ -1525,15 +1562,35 @@ button {
     gap: 10px;
   }
 
-  /* Payment Methods */
-  .payment-methods-grid {
-    grid-template-columns: repeat(2, 1fr);
+  /* Payment Selectors on Mobile */
+  .payment-primary-grid {
+    grid-template-columns: 1fr 1fr;
     gap: 8px;
   }
 
   .payment-method-card {
     padding: 10px 8px;
-    font-size: 0.8rem;
+    font-size: 0.82rem;
+  }
+
+  .sub-payment-tabs {
+    grid-template-columns: repeat(3, 1fr);
+    gap: 4px;
+  }
+
+  .sub-tab-btn {
+    padding: 8px 4px;
+    font-size: 0.72rem;
+  }
+
+  .upi-apps-list {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 6px;
+  }
+
+  .upi-app-chip {
+    padding: 8px 8px;
+    font-size: 0.76rem;
   }
 
   /* Modals */
@@ -1542,7 +1599,7 @@ button {
   }
 
   .modal-card {
-    padding: 22px 16px;
+    padding: 20px 14px;
     width: 100%;
     max-width: 100%;
     border-radius: var(--radius-md);
@@ -1550,12 +1607,12 @@ button {
   }
 
   .modal-card h2, .modal-card h3 {
-    font-size: 1.3rem;
+    font-size: 1.25rem;
   }
 
   .modal-close {
-    top: 14px;
-    right: 14px;
+    top: 12px;
+    right: 12px;
     font-size: 1.3rem;
   }
 
@@ -1574,24 +1631,39 @@ button {
 
   /* Auth Pages */
   .auth-container {
-    padding: 20px 14px;
+    padding: 16px 12px;
     min-height: 75vh;
   }
 
   .auth-card {
-    padding: 24px 18px;
+    padding: 22px 16px;
     border-radius: var(--radius-md);
   }
 
   .auth-card h2 {
-    font-size: 1.6rem !important;
+    font-size: 1.55rem !important;
+  }
+
+  /* Cart Table on Mobile */
+  .cart-table th, .cart-table td {
+    padding: 12px 8px;
+    font-size: 0.85rem;
+  }
+
+  .cart-item-info img {
+    width: 48px;
+    height: 48px;
   }
 }
 
-/* Small Mobile Phones (<= 440px) */
-@media (max-width: 440px) {
+/* Small Mobile Phones (<= 460px) */
+@media (max-width: 460px) {
+  .nav-brand {
+    font-size: 1.12rem;
+  }
+
   .hero-content h1 {
-    font-size: 1.85rem;
+    font-size: 1.8rem;
     line-height: 1.25;
   }
 
@@ -1609,12 +1681,12 @@ button {
   }
 
   .category-bar-section {
-    padding: 0 4% 16px 4%;
+    padding: 0 4% 14px 4%;
   }
 
   .category-chip {
-    padding: 8px 14px;
-    font-size: 0.82rem;
+    padding: 8px 12px;
+    font-size: 0.8rem;
   }
 
   .admin-grid-metrics {
@@ -1622,7 +1694,17 @@ button {
     gap: 10px;
   }
 
-  .payment-methods-grid {
+  .payment-primary-grid {
+    grid-template-columns: 1fr;
+    gap: 8px;
+  }
+
+  .sub-payment-tabs {
+    grid-template-columns: 1fr;
+    gap: 6px;
+  }
+
+  .upi-apps-list {
     grid-template-columns: 1fr;
   }
 
@@ -1633,18 +1715,28 @@ button {
   .coupon-box .btn {
     width: 100%;
   }
+
+  .dashboard-header-actions {
+    flex-direction: column;
+  }
+
+  .dashboard-header-actions .btn {
+    width: 100%;
+  }
 }
 
-/* Cart Table Mobile Responsive Scrollbar */
+/* Smooth Scrollbars for Horizontal Wrappers */
 .cart-table-wrapper::-webkit-scrollbar,
 .timeline-wrapper::-webkit-scrollbar,
-.category-scroll::-webkit-scrollbar {
+.category-scroll::-webkit-scrollbar,
+div[style*="overflow-x: auto"]::-webkit-scrollbar {
   height: 5px;
 }
 
 .cart-table-wrapper::-webkit-scrollbar-thumb,
 .timeline-wrapper::-webkit-scrollbar-thumb,
-.category-scroll::-webkit-scrollbar-thumb {
+.category-scroll::-webkit-scrollbar-thumb,
+div[style*="overflow-x: auto"]::-webkit-scrollbar-thumb {
   background: var(--border-color);
   border-radius: 4px;
 }
