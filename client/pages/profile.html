@@ -77,9 +77,12 @@
         return;
       }
 
-      document.getElementById('user-name').textContent = user.name || 'Customer';
-      document.getElementById('user-email').textContent = user.email || '';
-      document.getElementById('user-points').textContent = `🏆 ${user.rewardPoints || 50} Pts`;
+      const nameElem = document.getElementById('user-name');
+      const emailElem = document.getElementById('user-email');
+      const pointsElem = document.getElementById('user-points');
+      if (nameElem) nameElem.textContent = user.name || 'Customer';
+      if (emailElem) emailElem.textContent = user.email || '';
+      if (pointsElem) pointsElem.textContent = `🏆 ${user.rewardPoints || 50} Pts`;
     }
 
     async function loadMyOrdersList() {
@@ -108,7 +111,7 @@
                     <div style="font-size: 0.76rem; color: var(--text-light); margin-top: 2px;">📅 ${new Date(order.createdAt).toLocaleString('en-IN')}</div>
                   </div>
                   <div style="display: flex; align-items: center; gap: 8px; flex-wrap: wrap;">
-                    <span style="padding: 5px 12px; border-radius: 50px; background: var(--gold-accent); color: #FFF; font-weight: 700; font-size: 0.78rem;">
+                    <span style="padding: 5px 12px; border-radius: 50px; background: var(--gold-accent); color: #FFF; font-weight: 700; font-size: 0.78rem; box-shadow: 0 2px 8px rgba(212,175,55,0.35);">
                       ${order.orderStatus}
                     </span>
                     <a href="/api/orders/invoice/${order._id}" target="_blank" class="btn btn-outline btn-sm" style="padding: 5px 10px; font-size: 0.78rem;">
@@ -131,7 +134,7 @@
                       const isActive = idx === currentStepIdx;
                       return `
                         <div class="timeline-step ${isDone ? 'completed' : ''} ${isActive ? 'active' : ''}">
-                          <div class="step-circle">${isDone ? '✓' : (idx + 1)}</div>
+                          <div class="step-circle">${isDone && !isActive ? '✓' : (idx + 1)}</div>
                           <span class="step-title">${step}</span>
                         </div>
                       `;
@@ -176,25 +179,28 @@
       }
     }
 
-    document.getElementById('profile-update-form').addEventListener('submit', async (e) => {
-      e.preventDefault();
-      const phone = document.getElementById('prof-phone').value;
-      const street = document.getElementById('prof-street').value;
-      const city = document.getElementById('prof-city').value;
-      const zip = document.getElementById('prof-zip').value;
+    const profileForm = document.getElementById('profile-update-form');
+    if (profileForm) {
+      profileForm.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const phone = document.getElementById('prof-phone')?.value;
+        const street = document.getElementById('prof-street')?.value;
+        const city = document.getElementById('prof-city')?.value;
+        const zip = document.getElementById('prof-zip')?.value;
 
-      const token = getAuthToken();
-      const res = await fetch('/api/auth/profile', {
-        method: 'PUT',
-        headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
-        body: JSON.stringify({ phone, street, city, zip })
+        const token = getAuthToken();
+        const res = await fetch('/api/auth/profile', {
+          method: 'PUT',
+          headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
+          body: JSON.stringify({ phone, street, city, zip })
+        });
+        const data = await res.json();
+        if (data.success) {
+          showToast('Address & Account details saved!');
+          localStorage.setItem('bakery_user', JSON.stringify(data.user));
+        }
       });
-      const data = await res.json();
-      if (data.success) {
-        showToast('Address & Account details saved!');
-        localStorage.setItem('bakery_user', JSON.stringify(data.user));
-      }
-    });
+    }
 
     window.loadMyOrdersList = loadMyOrdersList;
 

@@ -32,20 +32,9 @@
       <h2 class="font-heading" style="margin-bottom: 20px;">Your Bakery Order Items</h2>
       
       <div id="cart-table-wrapper" class="cart-table-wrapper">
-        <table class="cart-table">
-          <thead>
-            <tr>
-              <th>Item</th>
-              <th>Price</th>
-              <th>Quantity</th>
-              <th>Subtotal</th>
-              <th>Action</th>
-            </tr>
-          </thead>
-          <tbody id="cart-items-body">
-            <!-- Dynamic Cart Rows -->
-          </tbody>
-        </table>
+        <div id="cart-items-body" class="cart-items-list">
+          <!-- Dynamic Cart Item Cards -->
+        </div>
       </div>
 
       <!-- Shipping Address Form -->
@@ -214,38 +203,38 @@
         const hasDiscount = discountPercent > 0;
 
         return `
-          <tr>
-            <td>
-              <div class="cart-item-info">
-                <img src="${item.image}" alt="${item.name}" onerror="this.onerror=null; this.src='https://images.unsplash.com/photo-1578985545062-69928b1d9587?auto=format&fit=crop&w=600&q=80'">
-                <div>
-                  <strong>${item.name}</strong>
-                  <div style="font-size: 0.8rem; color: var(--text-light);">Weight: ${item.weight}</div>
-                  ${item.stock !== undefined ? `<div style="font-size: 0.75rem; color: ${item.stock <= 5 ? '#E74C3C' : 'var(--text-light)'}; font-weight: 600; margin-top: 2px;">📦 Available Stock: ${item.stock}</div>` : ''}
+          <div class="cart-item-card">
+            <div class="cart-item-main">
+              <img src="${item.image}" alt="${item.name}" class="cart-item-img" onerror="this.onerror=null; this.src='https://images.unsplash.com/photo-1578985545062-69928b1d9587?auto=format&fit=crop&w=600&q=80'">
+              <div class="cart-item-text">
+                <div class="cart-item-header">
+                  <h4 class="cart-item-title">${item.name}</h4>
+                  <button onclick="removeFromCart('${item.productId}')" class="cart-del-btn" title="Remove item">🗑️</button>
+                </div>
+                <div class="cart-item-meta">Weight: ${item.weight} ${item.stock !== undefined ? `<span style="color: ${item.stock <= 5 ? '#E74C3C' : 'var(--text-light)'};">• Stock: ${item.stock}</span>` : ''}</div>
+                <div class="cart-item-controls">
+                  <div class="cart-item-pricing">
+                    ${hasDiscount ? `
+                      <span class="cart-old-price">₹${origPrice}</span>
+                      <span class="cart-discount-badge">${discountPercent}% OFF</span>
+                      <span class="cart-final-price">₹${item.price}</span>
+                    ` : `
+                      <span class="cart-final-price">₹${item.price}</span>
+                    `}
+                  </div>
+                  <div class="qty-control">
+                    <button class="qty-btn" onclick="updateCartQuantity('${item.productId}', ${item.quantity - 1})">-</button>
+                    <span>${item.quantity}</span>
+                    <button class="qty-btn" onclick="updateCartQuantity('${item.productId}', ${item.quantity + 1})">+</button>
+                  </div>
                 </div>
               </div>
-            </td>
-            <td>
-              ${hasDiscount ? `
-                <div style="font-size: 0.85rem; text-decoration: line-through; color: var(--text-light);">₹${origPrice}</div>
-                <div style="background: rgba(231, 76, 60, 0.12); color: #E74C3C; font-size: 0.72rem; font-weight: 700; padding: 2px 6px; border-radius: 4px; display: inline-block; margin: 2px 0;">${discountPercent}% OFF (-₹${discountAmt})</div>
-                <div style="font-weight: 700; color: var(--gold-accent);">₹${item.price}</div>
-              ` : `
-                <div style="font-weight: 700;">₹${item.price}</div>
-              `}
-            </td>
-            <td>
-              <div class="qty-control">
-                <button class="qty-btn" onclick="updateCartQuantity('${item.productId}', ${item.quantity - 1})">-</button>
-                <span>${item.quantity}</span>
-                <button class="qty-btn" onclick="updateCartQuantity('${item.productId}', ${item.quantity + 1})">+</button>
-              </div>
-            </td>
-            <td><strong>₹${(item.price * item.quantity).toFixed(2)}</strong></td>
-            <td>
-              <button onclick="removeFromCart('${item.productId}')" style="background: none; border: none; color: #E74C3C; font-size: 1.2rem; cursor: pointer;">🗑️</button>
-            </td>
-          </tr>
+            </div>
+            <div class="cart-item-subtotal">
+              <span>Item Subtotal:</span>
+              <strong>₹${(item.price * item.quantity).toFixed(2)}</strong>
+            </div>
+          </div>
         `;
       }).join('');
 
