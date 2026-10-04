@@ -31,47 +31,31 @@
 
   <div class="profile-layout-container">
     
-    <!-- Left Column: Customer Profile & Saved Address Details -->
-    <div class="glass-panel profile-sidebar-card">
-      <div style="text-align: center; margin-bottom: 20px;">
-        <img id="user-avatar" src="https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?auto=format&fit=crop&w=150&q=80" style="width: 90px; height: 90px; border-radius: 50%; object-fit: cover; border: 3px solid var(--gold-accent);">
-        <h3 id="user-name" class="font-heading" style="margin-top: 10px;">Customer Name</h3>
-        <p id="user-email" style="font-size: 0.85rem; color: var(--text-light);">customer@example.com</p>
+    <!-- Top Customer Profile & Points Summary -->
+    <div class="glass-panel profile-sidebar-card" style="display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 14px; padding: 18px 20px;">
+      <div style="display: flex; align-items: center; gap: 14px;">
+        <img id="user-avatar" src="https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?auto=format&fit=crop&w=150&q=80" style="width: 58px; height: 58px; border-radius: 50%; object-fit: cover; border: 2.5px solid var(--gold-accent); flex-shrink: 0;">
+        <div>
+          <h3 id="user-name" class="font-heading" style="font-size: 1.25rem; line-height: 1.2;">Customer Name</h3>
+          <p id="user-email" style="font-size: 0.82rem; color: var(--text-light); margin-top: 2px;">customer@example.com</p>
+        </div>
       </div>
 
-      <div style="background: var(--light-gold); padding: 14px; border-radius: var(--radius-sm); text-align: center; margin-bottom: 20px;">
-        <div style="font-size: 0.8rem; font-weight: 700; color: #8B4513;">REWARD POINTS BALANCE</div>
-        <div id="user-points" style="font-size: 1.8rem; font-weight: 800; color: var(--gold-accent);">🏆 50 Pts</div>
+      <div style="background: var(--light-gold); padding: 8px 16px; border-radius: var(--radius-sm); text-align: center;">
+        <div style="font-size: 0.7rem; font-weight: 700; color: #8B4513;">REWARD POINTS</div>
+        <div id="user-points" style="font-size: 1.3rem; font-weight: 800; color: var(--gold-accent);">🏆 50 Pts</div>
       </div>
-
-      <h4 style="font-weight: 700; margin-bottom: 12px; font-size: 0.95rem;">Saved Address & Account Info</h4>
-
-      <form id="profile-update-form">
-        <div class="form-group">
-          <label>Phone Number</label>
-          <input type="text" id="prof-phone" class="form-control" placeholder="+91 9876543210">
-        </div>
-        <div class="form-group">
-          <label>Street / House Address</label>
-          <input type="text" id="prof-street" class="form-control" placeholder="12 Bakery Lane">
-        </div>
-        <div class="form-grid-2col">
-          <div class="form-group">
-            <label>City</label>
-            <input type="text" id="prof-city" class="form-control" placeholder="Ahmedabad">
-          </div>
-          <div class="form-group">
-            <label>Pincode</label>
-            <input type="text" id="prof-zip" class="form-control" placeholder="380001">
-          </div>
-        </div>
-        <button type="submit" class="btn btn-gold btn-sm" style="width: 100%;">Save Address Info</button>
-      </form>
     </div>
 
     <!-- Right Column: Active Orders & Live Timeline -->
     <div class="glass-panel profile-orders-card">
-      <h2 class="font-heading" style="margin-bottom: 20px;">Your Orders & Real-Time Tracking 🚚</h2>
+      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; flex-wrap: wrap; gap: 8px;">
+        <h2 class="font-heading" style="font-size: 1.4rem;">Your Orders & Live Tracking 🚚</h2>
+        <span style="font-size: 0.78rem; color: #27AE60; font-weight: 700; display: flex; align-items: center; gap: 6px; background: rgba(39, 174, 96, 0.1); padding: 4px 10px; border-radius: 50px;">
+          <span style="display: inline-block; width: 7px; height: 7px; border-radius: 50%; background: #27AE60;"></span>
+          Live Socket Updates
+        </span>
+      </div>
       <div id="my-orders-container">
         <!-- Dynamic Orders List -->
       </div>
@@ -93,15 +77,9 @@
         return;
       }
 
-      document.getElementById('user-name').textContent = user.name;
-      document.getElementById('user-email').textContent = user.email;
+      document.getElementById('user-name').textContent = user.name || 'Customer';
+      document.getElementById('user-email').textContent = user.email || '';
       document.getElementById('user-points').textContent = `🏆 ${user.rewardPoints || 50} Pts`;
-      if (user.phone) document.getElementById('prof-phone').value = user.phone;
-      if (user.address) {
-        document.getElementById('prof-street').value = user.address.street || '';
-        document.getElementById('prof-city').value = user.address.city || '';
-        document.getElementById('prof-zip').value = user.address.zip || '';
-      }
     }
 
     async function loadMyOrdersList() {
@@ -118,22 +96,31 @@
         if (data.success && data.orders.length > 0) {
           container.innerHTML = data.orders.map(order => {
             const currentStepIdx = orderSteps.indexOf(order.orderStatus);
+            const addressText = order.shippingAddress && (order.shippingAddress.street || order.shippingAddress.city)
+              ? `${order.shippingAddress.street ? order.shippingAddress.street + ', ' : ''}${order.shippingAddress.city || ''} ${order.shippingAddress.zip ? '- ' + order.shippingAddress.zip : ''}`
+              : 'Ahmedabad, 380001';
 
             return `
               <div class="order-history-card">
                 <div class="order-card-header">
                   <div>
-                    <h3 style="font-size: 1.15rem;">Order #${order.orderNumber}</h3>
-                    <div style="font-size: 0.8rem; color: var(--text-light);">${new Date(order.createdAt).toLocaleString('en-IN')}</div>
+                    <h3 style="font-size: 1.05rem; color: var(--text-primary); line-height: 1.3;">Order #${order.orderNumber}</h3>
+                    <div style="font-size: 0.76rem; color: var(--text-light); margin-top: 2px;">📅 ${new Date(order.createdAt).toLocaleString('en-IN')}</div>
                   </div>
                   <div style="display: flex; align-items: center; gap: 8px; flex-wrap: wrap;">
-                    <span style="padding: 6px 14px; border-radius: 50px; background: var(--gold-accent); color: #FFF; font-weight: 700; font-size: 0.85rem;">
+                    <span style="padding: 5px 12px; border-radius: 50px; background: var(--gold-accent); color: #FFF; font-weight: 700; font-size: 0.78rem;">
                       ${order.orderStatus}
                     </span>
-                    <a href="/api/orders/invoice/${order._id}" target="_blank" class="btn btn-outline btn-sm">
-                      📄 PDF Bill
+                    <a href="/api/orders/invoice/${order._id}" target="_blank" class="btn btn-outline btn-sm" style="padding: 5px 10px; font-size: 0.78rem;">
+                      📄 Bill
                     </a>
                   </div>
+                </div>
+
+                <!-- Delivery Address on file for this order -->
+                <div style="margin: 10px 0 12px 0; padding: 8px 12px; background: rgba(212, 175, 55, 0.08); border-radius: var(--radius-sm); font-size: 0.8rem; color: var(--text-secondary); display: flex; align-items: center; gap: 6px; word-break: break-word;">
+                  <span>📍</span>
+                  <span>Delivering to: <strong style="color: var(--text-primary);">${addressText}</strong></span>
                 </div>
 
                 <!-- Order Timeline Stepper -->
@@ -153,23 +140,23 @@
                 </div>
 
                 <!-- Ordered Items List -->
-                <div style="border-top: 1px solid var(--border-color); padding-top: 14px; margin-top: 14px;">
+                <div style="border-top: 1px solid var(--border-color); padding-top: 12px; margin-top: 12px;">
                   ${order.items.map(item => {
                     const origPrice = item.originalPrice !== undefined ? item.originalPrice : item.price;
                     const discPercent = item.discount || 0;
                     return `
-                      <div style="display: flex; justify-content: space-between; font-size: 0.9rem; margin-bottom: 6px;">
-                        <span>${item.name} (${item.weight}) x ${item.quantity} ${discPercent > 0 ? `<span style="color: #E74C3C; font-size: 0.8rem; font-weight: 700;">[${discPercent}% OFF]</span>` : ''}</span>
-                        <span>
-                          ${discPercent > 0 ? `<span style="text-decoration: line-through; color: var(--text-light); font-size: 0.8rem; margin-right: 6px;">₹${(origPrice * item.quantity).toFixed(2)}</span>` : ''}
-                          <strong>₹${(item.price * item.quantity).toFixed(2)}</strong>
+                      <div style="display: flex; justify-content: space-between; align-items: center; font-size: 0.86rem; margin-bottom: 6px; flex-wrap: wrap; gap: 4px;">
+                        <span>${item.name} (${item.weight}) <span style="color: var(--text-light); font-weight: 600;">x${item.quantity}</span> ${discPercent > 0 ? `<span style="color: #E74C3C; font-size: 0.72rem; font-weight: 700; background: rgba(231,76,60,0.1); padding: 1px 4px; border-radius: 3px;">${discPercent}% OFF</span>` : ''}</span>
+                        <span style="white-space: nowrap;">
+                          ${discPercent > 0 ? `<span style="text-decoration: line-through; color: var(--text-light); font-size: 0.78rem; margin-right: 4px;">₹${(origPrice * item.quantity).toFixed(2)}</span>` : ''}
+                          <strong style="color: var(--text-primary);">₹${(item.price * item.quantity).toFixed(2)}</strong>
                         </span>
                       </div>
                     `;
                   }).join('')}
-                  <div style="display: flex; justify-content: space-between; font-size: 1.1rem; font-weight: 800; margin-top: 10px; color: var(--gold-accent);">
+                  <div style="display: flex; justify-content: space-between; align-items: center; font-size: 1.02rem; font-weight: 800; margin-top: 10px; padding-top: 8px; border-top: 1px dashed var(--border-color); color: var(--gold-accent); flex-wrap: wrap; gap: 4px;">
                     <span>Grand Total Paid</span>
-                    <span>₹${order.grandTotal.toFixed(2)} (${order.paymentMethod})</span>
+                    <span style="white-space: nowrap;">₹${order.grandTotal.toFixed(2)} <small style="font-size: 0.75rem; color: var(--text-light); font-weight: 600;">(${order.paymentMethod})</small></span>
                   </div>
                 </div>
               </div>
