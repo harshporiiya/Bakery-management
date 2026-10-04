@@ -438,16 +438,13 @@
     window.renderCartPage = renderCartPage;
 
     document.addEventListener('DOMContentLoaded', () => {
-      if (!isLoggedIn()) {
-        alert('⚠️ You must register an account first to make an order!');
-        window.location.href = '/pages/signup.html';
-        return;
-      }
-
       const user = getCurrentUser();
       if (user) {
-        document.getElementById('cust-name').value = user.name || '';
-        document.getElementById('cust-phone').value = user.phone || '';
+        if (document.getElementById('cust-name')) document.getElementById('cust-name').value = user.name || '';
+        if (document.getElementById('cust-phone')) document.getElementById('cust-phone').value = user.phone || '';
+        if (document.getElementById('street-address') && user.shippingAddress?.street) {
+          document.getElementById('street-address').value = user.shippingAddress.street;
+        }
       }
       renderCartPage();
 
