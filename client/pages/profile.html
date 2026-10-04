@@ -32,7 +32,7 @@
   <div class="profile-layout-container">
     
     <!-- Left Column: Customer Profile & Saved Address Details -->
-    <div class="glass-panel" style="padding: 28px; height: max-content;">
+    <div class="glass-panel profile-sidebar-card">
       <div style="text-align: center; margin-bottom: 20px;">
         <img id="user-avatar" src="https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?auto=format&fit=crop&w=150&q=80" style="width: 90px; height: 90px; border-radius: 50%; object-fit: cover; border: 3px solid var(--gold-accent);">
         <h3 id="user-name" class="font-heading" style="margin-top: 10px;">Customer Name</h3>
@@ -70,7 +70,7 @@
     </div>
 
     <!-- Right Column: Active Orders & Live Timeline -->
-    <div class="glass-panel" style="padding: 28px;">
+    <div class="glass-panel profile-orders-card">
       <h2 class="font-heading" style="margin-bottom: 20px;">Your Orders & Real-Time Tracking 🚚</h2>
       <div id="my-orders-container">
         <!-- Dynamic Orders List -->
@@ -120,7 +120,7 @@
             const currentStepIdx = orderSteps.indexOf(order.orderStatus);
 
             return `
-              <div style="background: var(--card-bg); border: 1px solid var(--border-color); border-radius: var(--radius-md); padding: 24px; margin-bottom: 24px;">
+              <div class="order-history-card">
                 <div class="order-card-header">
                   <div>
                     <h3 style="font-size: 1.15rem;">Order #${order.orderNumber}</h3>
