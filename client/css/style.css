@@ -849,6 +849,13 @@ button {
 }
 
 /* Payment Selector */
+.payment-primary-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+  margin: 14px 0 10px 0;
+}
+
 .payment-methods-grid {
   display: grid;
   grid-template-columns: repeat(2, 1fr);
@@ -857,21 +864,129 @@ button {
 }
 
 .payment-method-card {
-  padding: 12px;
-  border: 1px solid var(--border-color);
+  padding: 12px 10px;
+  border: 1.5px solid var(--border-color);
   border-radius: var(--radius-sm);
   text-align: center;
-  font-size: 0.85rem;
+  font-size: 0.88rem;
   font-weight: 600;
   cursor: pointer;
   background: var(--input-bg);
   transition: all var(--transition-fast);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+}
+
+.payment-method-card:hover {
+  border-color: var(--gold-accent);
+  transform: translateY(-2px);
 }
 
 .payment-method-card.selected {
   border-color: var(--gold-accent);
   background: rgba(212, 175, 55, 0.15);
   color: var(--gold-accent);
+  box-shadow: 0 4px 12px rgba(212, 175, 55, 0.18);
+}
+
+/* Net Banking & UPI Sub-options Box */
+.netbanking-sub-box {
+  margin-top: 12px;
+  margin-bottom: 12px;
+  padding: 14px;
+  border-radius: var(--radius-sm);
+  background: var(--card-bg, rgba(255, 255, 255, 0.04));
+  border: 1px solid var(--gold-accent);
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.08);
+  animation: slideDownFade 0.25s ease-out;
+}
+
+@keyframes slideDownFade {
+  from {
+    opacity: 0;
+    transform: translateY(-6px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.sub-payment-tabs {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 6px;
+  margin-bottom: 12px;
+}
+
+.sub-tab-btn {
+  padding: 8px 4px;
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--border-color);
+  background: var(--input-bg);
+  color: var(--text-secondary);
+  font-size: 0.76rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all var(--transition-fast);
+  text-align: center;
+}
+
+.sub-tab-btn:hover {
+  border-color: var(--gold-accent);
+  color: var(--text-primary);
+}
+
+.sub-tab-btn.active {
+  background: var(--gold-accent);
+  color: #1a120b;
+  border-color: var(--gold-accent);
+  font-weight: 700;
+}
+
+.sub-tab-panel {
+  display: none;
+  animation: slideDownFade 0.2s ease-out;
+}
+
+.sub-tab-panel.active {
+  display: block;
+}
+
+.upi-apps-list {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 8px;
+}
+
+.upi-app-chip {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 9px 10px;
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-sm);
+  background: var(--input-bg);
+  cursor: pointer;
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: var(--text-primary);
+  transition: all var(--transition-fast);
+}
+
+.upi-app-chip:hover {
+  border-color: var(--gold-accent);
+  transform: translateY(-1px);
+}
+
+.upi-app-chip.selected {
+  border-color: var(--gold-accent);
+  background: rgba(212, 175, 55, 0.15);
+  color: var(--gold-accent);
+  font-weight: 700;
 }
 
 /* Order Timeline (Customer Dashboard & Profile) */

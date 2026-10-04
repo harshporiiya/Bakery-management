@@ -110,14 +110,71 @@
 
       <!-- Payment Method Selector -->
       <h4 style="font-size: 0.9rem; font-weight: 700; margin-top: 16px;">Select Payment Method</h4>
-      <div class="payment-methods-grid">
-        <div class="payment-method-card selected" onclick="selectPaymentMethod('Cash', this)">💵 Cash on Delivery</div>
-        <div class="payment-method-card" onclick="selectPaymentMethod('UPI', this)">📱 UPI / QR</div>
-        <div class="payment-method-card" onclick="selectPaymentMethod('Google Pay', this)">🔵 Google Pay</div>
-        <div class="payment-method-card" onclick="selectPaymentMethod('PhonePe', this)">🟣 PhonePe</div>
-        <div class="payment-method-card" onclick="selectPaymentMethod('Paytm', this)">💙 Paytm</div>
-        <div class="payment-method-card" onclick="selectPaymentMethod('Credit Card', this)">💳 Credit / Debit Card</div>
-        <div class="payment-method-card" onclick="selectPaymentMethod('Net Banking', this)">🏦 Net Banking</div>
+      
+      <!-- Primary Payment Selection: Cash on Delivery & Net Banking -->
+      <div class="payment-primary-grid">
+        <div class="payment-method-card selected" id="method-cod" onclick="selectPrimaryPayment('Cash', this)">
+          <span style="font-size: 1.3rem;">💵</span>
+          <span>Cash on Delivery</span>
+        </div>
+        <div class="payment-method-card" id="method-netbanking" onclick="selectPrimaryPayment('Net Banking', this)">
+          <span style="font-size: 1.3rem;">🏦</span>
+          <span>Net Banking</span>
+        </div>
+      </div>
+
+      <!-- Net Banking Sub-Options (UPI ID, UPI Apps, Credit/Debit Card) -->
+      <div id="netbanking-sub-box" class="netbanking-sub-box" style="display: none;">
+        <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 10px;">
+          <span style="font-size: 0.8rem; font-weight: 700; color: var(--gold-accent);">⚡ Online Payment Options</span>
+          <span id="sub-method-indicator" style="font-size: 0.72rem; color: var(--gold-accent); background: rgba(212, 175, 55, 0.12); padding: 2px 8px; border-radius: 4px; font-weight: 600;">UPI ID</span>
+        </div>
+
+        <!-- 3 Sub Tabs: UPI ID, UPI Apps, Card -->
+        <div class="sub-payment-tabs">
+          <button type="button" class="sub-tab-btn active" id="tab-btn-upi-id" onclick="switchOnlineTab('upi-id', this)">📱 UPI ID</button>
+          <button type="button" class="sub-tab-btn" id="tab-btn-upi-apps" onclick="switchOnlineTab('upi-apps', this)">📲 UPI Apps</button>
+          <button type="button" class="sub-tab-btn" id="tab-btn-cards" onclick="switchOnlineTab('cards', this)">💳 Card</button>
+        </div>
+
+        <!-- 1. UPI ID Input -->
+        <div id="panel-upi-id" class="sub-tab-panel active">
+          <p style="font-size: 0.75rem; color: var(--text-secondary); margin-bottom: 6px;">Enter your UPI ID / VPA (e.g. name@okhdfcbank, mobile@upi):</p>
+          <div style="display: flex; gap: 6px;">
+            <input type="text" id="upi-id-input" class="form-control" placeholder="username@upi" style="font-size: 0.82rem; padding: 7px 10px;">
+            <button type="button" class="btn btn-gold btn-sm" onclick="verifyUpiId()" style="padding: 7px 12px; font-size: 0.78rem; white-space: nowrap;">Verify</button>
+          </div>
+          <small id="upi-verify-msg" style="display: block; margin-top: 4px; font-size: 0.72rem; min-height: 16px;"></small>
+        </div>
+
+        <!-- 2. UPI Apps (GPay, PhonePe, Paytm) -->
+        <div id="panel-upi-apps" class="sub-tab-panel">
+          <p style="font-size: 0.75rem; color: var(--text-secondary); margin-bottom: 6px;">Select UPI App:</p>
+          <div class="upi-apps-list">
+            <div class="upi-app-chip selected" data-app="Google Pay" onclick="selectUpiApp('Google Pay', this)">
+              <span>🔵</span> Google Pay
+            </div>
+            <div class="upi-app-chip" data-app="PhonePe" onclick="selectUpiApp('PhonePe', this)">
+              <span>🟣</span> PhonePe
+            </div>
+            <div class="upi-app-chip" data-app="Paytm" onclick="selectUpiApp('Paytm', this)">
+              <span>💙</span> Paytm
+            </div>
+            <div class="upi-app-chip" data-app="UPI" onclick="selectUpiApp('UPI', this)">
+              <span>⚡</span> Other UPI
+            </div>
+          </div>
+        </div>
+
+        <!-- 3. Credit / Debit Card -->
+        <div id="panel-cards" class="sub-tab-panel">
+          <p style="font-size: 0.75rem; color: var(--text-secondary); margin-bottom: 6px;">Enter Card Details:</p>
+          <input type="text" id="card-num" class="form-control" placeholder="Card Number (16 digits)" maxlength="19" style="font-size: 0.82rem; padding: 7px 10px; margin-bottom: 6px;">
+          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 6px;">
+            <input type="text" id="card-exp" class="form-control" placeholder="MM/YY" maxlength="5" style="font-size: 0.82rem; padding: 7px 10px;">
+            <input type="password" id="card-cvv" class="form-control" placeholder="CVV (3 digits)" maxlength="3" style="font-size: 0.82rem; padding: 7px 10px;">
+          </div>
+        </div>
       </div>
 
       <button onclick="processCheckout()" class="btn btn-gold" style="width: 100%; margin-top: 16px;">
@@ -221,10 +278,88 @@
       applyCouponCode(code);
     }
 
+    let currentOnlineSubMethod = 'UPI';
+
+    function selectPrimaryPayment(method, element) {
+      document.querySelectorAll('.payment-primary-grid .payment-method-card').forEach(el => el.classList.remove('selected'));
+      if (element) element.classList.add('selected');
+
+      const subBox = document.getElementById('netbanking-sub-box');
+
+      if (method === 'Cash') {
+        selectedPayment = 'Cash';
+        if (subBox) subBox.style.display = 'none';
+      } else {
+        if (subBox) subBox.style.display = 'block';
+        selectedPayment = currentOnlineSubMethod || 'UPI';
+      }
+    }
+
+    function switchOnlineTab(tabKey, btnElement) {
+      document.querySelectorAll('.sub-tab-btn').forEach(btn => btn.classList.remove('active'));
+      document.querySelectorAll('.sub-tab-panel').forEach(panel => panel.classList.remove('active'));
+
+      if (btnElement) btnElement.classList.add('active');
+
+      const indicator = document.getElementById('sub-method-indicator');
+
+      if (tabKey === 'upi-id') {
+        const panel = document.getElementById('panel-upi-id');
+        if (panel) panel.classList.add('active');
+        currentOnlineSubMethod = 'UPI';
+        selectedPayment = 'UPI';
+        if (indicator) indicator.textContent = 'UPI ID';
+      } else if (tabKey === 'upi-apps') {
+        const panel = document.getElementById('panel-upi-apps');
+        if (panel) panel.classList.add('active');
+        const activeChip = document.querySelector('.upi-app-chip.selected');
+        const appName = activeChip ? activeChip.getAttribute('data-app') || 'Google Pay' : 'Google Pay';
+        currentOnlineSubMethod = appName;
+        selectedPayment = appName;
+        if (indicator) indicator.textContent = appName;
+      } else if (tabKey === 'cards') {
+        const panel = document.getElementById('panel-cards');
+        if (panel) panel.classList.add('active');
+        currentOnlineSubMethod = 'Credit Card';
+        selectedPayment = 'Credit Card';
+        if (indicator) indicator.textContent = 'Credit / Debit Card';
+      }
+    }
+
+    function selectUpiApp(appName, element) {
+      document.querySelectorAll('.upi-app-chip').forEach(el => el.classList.remove('selected'));
+      if (element) element.classList.add('selected');
+      currentOnlineSubMethod = appName;
+      selectedPayment = appName;
+      const indicator = document.getElementById('sub-method-indicator');
+      if (indicator) indicator.textContent = appName;
+    }
+
+    function verifyUpiId() {
+      const input = document.getElementById('upi-id-input');
+      const msg = document.getElementById('upi-verify-msg');
+      const val = input ? input.value.trim() : '';
+
+      if (!val || !val.includes('@')) {
+        if (msg) {
+          msg.textContent = '❌ Enter a valid UPI ID (e.g. name@okhdfcbank)';
+          msg.style.color = '#e74c3c';
+        }
+        return;
+      }
+
+      if (msg) {
+        msg.textContent = '✅ Verified UPI ID (' + val + ')';
+        msg.style.color = '#27ae60';
+      }
+    }
+
     function selectPaymentMethod(method, element) {
-      selectedPayment = method;
-      document.querySelectorAll('.payment-method-card').forEach(el => el.classList.remove('selected'));
-      element.classList.add('selected');
+      if (method === 'Cash') {
+        selectPrimaryPayment('Cash', document.getElementById('method-cod'));
+      } else {
+        selectPrimaryPayment('Net Banking', document.getElementById('method-netbanking'));
+      }
     }
 
     async function processCheckout() {
